@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"tertiary-fixed-dim":"#c8c5d0","outline-variant":"#cbc4d0","tertiary":"#5c5b64","on-primary":"#ffffff","surface-dim":"#e1d5ee","tertiary-container":"#75737d","on-background":"#1f182a","on-tertiary-container":"#fffbff","secondary-fixed-dim":"#d2bcfe","secondary-fixed":"#eaddff","on-secondary":"#ffffff","surface-container":"#f5eaff","on-error-container":"#93000a","primary-container":"#7e69ab","primary-fixed":"#eaddff","surface-container-low":"#faf0ff","on-primary-fixed":"#230c4c","surface-variant":"#eadef6","surface-container-high":"#f0e3fc","secondary":"#67548f","on-secondary-fixed-variant":"#4f3d75","error-container":"#ffdad6","on-tertiary-fixed":"#1b1b23","primary-fixed-dim":"#d2bcff","on-primary-container":"#fffbff","on-tertiary-fixed-variant":"#47464f","on-surface-variant":"#49454f","surface-tint":"#685393","on-error":"#ffffff","on-surface":"#1f182a","surface-container-lowest":"#ffffff","inverse-surface":"#342d3f","secondary-container":"#d2bcfe","tertiary-fixed":"#e4e1ed","error":"#ba1a1a","surface-bright":"#fef7ff","surface":"#fef7ff","inverse-on-surface":"#f7edff","on-secondary-fixed":"#220f47","inverse-primary":"#d2bcff","on-tertiary":"#ffffff","on-primary-fixed-variant":"#4f3b7a","background":"#fef7ff","surface-container-highest":"#eadef6","outline":"#7a7580","primary":"#655090","on-secondary-container":"#5b4882"},"borderRadius":{"DEFAULT":"1rem","lg":"2rem","xl":"3rem","full":"9999px"},"spacing":{"space-md":"1.25rem","space-lg":"2.25rem","gutter-mobile":"1rem","margin":"3.5rem","space-sm":"0.75rem","space-xs":"0.375rem","space-xl":"4rem","gutter":"1.5rem","margin-mobile":"1.25rem"},"fontFamily":{"body-md":["Plus Jakarta Sans"],"headline-lg-mobile":["Outfit"],"headline-lg":["Outfit"],"label-lg":["Outfit"],"body-lg":["Plus Jakarta Sans"],"label-sm":["Outfit"],"display-mobile":["Outfit"],"display":["Outfit"],"label-md":["Outfit"],"headline-sm":["Outfit"],"headline-md":["Outfit"],"body-sm":["Plus Jakarta Sans"]},"fontSize":{"body-md":["0.9375rem",{"lineHeight":"1.6","letterSpacing":"0","fontWeight":"400"}],"headline-lg-mobile":["2rem",{"lineHeight":"1.2","letterSpacing":"-0.015em","fontWeight":"500"}],"headline-lg":["3rem",{"lineHeight":"1.15","letterSpacing":"-0.025em","fontWeight":"400"}],"label-lg":["0.875rem",{"lineHeight":"1.2","letterSpacing":"0.06em","fontWeight":"500"}],"body-lg":["1.125rem",{"lineHeight":"1.65","letterSpacing":"-0.005em","fontWeight":"400"}],"label-sm":["0.6875rem",{"lineHeight":"1.1","letterSpacing":"0.1em","fontWeight":"600"}],"display-mobile":["2.75rem",{"lineHeight":"1.1","letterSpacing":"-0.02em","fontWeight":"400"}],"display":["4.5rem",{"lineHeight":"1.05","letterSpacing":"-0.03em","fontWeight":"400"}],"label-md":["0.75rem",{"lineHeight":"1.2","letterSpacing":"0.08em","fontWeight":"600"}],"headline-sm":["1.25rem",{"lineHeight":"1.35","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-md":["2rem",{"lineHeight":"1.25","letterSpacing":"-0.015em","fontWeight":"500"}],"body-sm":["0.8125rem",{"lineHeight":"1.5","letterSpacing":"0.005em","fontWeight":"400"}]}}}};</script></head><body class="bg-background font-body-md text-on-surface antialiased selection:bg-secondary-container selection:text-on-secondary-container"><header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(45,38,56,0.04)]"><div class="h-20 w-full px-margin flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-lg shrink-0"><div class="flex items-center gap-space-xs"><span class="text-primary font-headline-sm text-headline-sm font-semibold tracking-tight">GEONORMA</span><span class="text-tertiary-fixed-dim font-headline-sm text-headline-sm">//</span><span class="font-label-lg text-label-lg tracking-widest uppercase text-on-surface-variant font-medium">SOGAMOSO</span><span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm ml-space-xs">✻</span></div><div class="hidden xl:flex items-center gap-space-xs px-space-sm py-1.5 rounded-full bg-surface-container-low"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Sogamoso · Sector 01 El Rosario · Cl 11 # 14-25</span><span class="font-label-sm text-label-sm text-primary font-medium ml-1">(420.00 m²)</span></div></div><nav class="hidden lg:flex items-center gap-space-xs p-1 rounded-full bg-surface-container-lowest/80" data-active-classes="bg-surface-container-highest text-primary font-medium rounded-full"><a class="px-space-md py-2 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200" data-path="explorador-urbano" href="#">Explorador Urbano</a><a aria-current="page" class="px-space-md py-2 transition-all duration-200 bg-surface-container-highest text-primary font-medium rounded-full" data-path="ficha-normativa" href="#">Ficha Normativa</a><a class="px-space-md py-2 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200" data-path="simulador-de-cumplimiento" href="#">Simulador de Cumplimiento</a><a class="px-space-md py-2 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200" data-path="calculadora-de-cesiones" href="#">Calculadora de Cesiones</a></nav><div class="flex items-center gap-space-sm shrink-0"><div class="hidden sm:flex items-center gap-space-xs px-space-sm py-2 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md"><span class="material-symbols-outlined text-primary text-[18px]">layers</span><span class="font-medium">POT Ac. 016/2016 (V2.4)</span></div><button class="inline-flex items-center gap-space-xs px-space-md py-2.5 rounded-full bg-primary text-on-primary font-label-lg text-label-lg hover:bg-primary-container hover:text-on-primary-container transition-all shadow-[0_4px_16px_-2px_rgba(101,80,144,0.25)]" type="button"><span class="material-symbols-outlined text-[16px]">picture_as_pdf</span><span>Exportar Dossier PDF</span><span class="material-symbols-outlined text-[16px]">north_east</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 bg-background"><div class="flex flex-col w-full">
+<!-- Subtle decorative ambient glows (scoped) -->
+<div class="relative w-full overflow-hidden">
+<div class="absolute -top-32 right-12 w-96 h-96 rounded-full bg-secondary-fixed/40 blur-3xl pointer-events-none -z-10"></div>
+<div class="absolute top-96 -left-20 w-80 h-80 rounded-full bg-primary-fixed/30 blur-3xl pointer-events-none -z-10"></div>
+<!-- Editorial Upper Canvas: Identifier, Badges & Interactive Status -->
+<section class="w-full px-margin-mobile md:px-margin pt-6 md:pt-10 pb-8">
+<div class="max-w-[1320px] mx-auto flex flex-col gap-6">
+<!-- Top Micro-bar: Meta & Stamps -->
+<div class="flex flex-wrap items-center justify-between gap-4 pb-4 bg-surface-container-low/60 p-4 rounded-xl shadow-sm">
+<div class="flex flex-wrap items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm tracking-widest uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+              Ficha Normativa Vigente
+            </span>
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px] text-primary">qr_code_2</span>
+              Radicado SIG: SOG-2024-C2-40012
+            </span>
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary">domain_verification</span>
+              Matrícula Inmobiliaria: 095-481920
+            </span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary">Sector Catastral 01 · Comuna 2</span>
+<span class="px-2.5 py-0.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm">Expedición Inmediata</span>
+</div>
+</div>
+<!-- Main Title & Spatial Identity Bento -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+<!-- Left 8 cols: High-contrast Typographic Hero -->
+<div class="lg:col-span-8 bg-surface-container-lowest p-8 md:p-10 rounded-lg shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="flex flex-col gap-3">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-[20px]">location_on</span>
+<span class="font-label-md text-label-md uppercase tracking-widest text-primary">Predio Urbano Consolidado</span>
+<span class="text-tertiary-fixed-dim">/</span>
+<span class="font-label-md text-label-md uppercase tracking-widest text-tertiary">Estrato 4</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight leading-none mt-1">
+                CALLE 11 <span class="text-primary font-normal italic font-headline-lg"># 14-25</span>
+</h1>
+<p class="font-headline-sm text-headline-sm text-tertiary font-normal">
+                Barrio El Rosario, Sogamoso · Boyacá · Perfil Vía Colectora <span class="text-on-surface font-semibold">V-3</span>
+</p>
+</div>
+<!-- Key Metric Chips inline -->
+<div class="pt-8 mt-6 flex flex-wrap items-end justify-between gap-4">
+<div class="flex flex-wrap gap-4">
+<div class="px-4 py-3 rounded-DEFAULT bg-surface-container-low flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary">Área de Terreno</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">420.00</span>
+<span class="font-label-sm text-label-sm text-primary font-medium">m²</span>
+</div>
+</div>
+<div class="px-4 py-3 rounded-DEFAULT bg-surface-container-low flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary">Frente de Lote</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">14.00</span>
+<span class="font-label-sm text-label-sm text-primary font-medium">ml</span>
+</div>
+</div>
+<div class="px-4 py-3 rounded-DEFAULT bg-surface-container-low flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary">Fondo de Lote</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">30.00</span>
+<span class="font-label-sm text-label-sm text-primary font-medium">ml</span>
+</div>
+</div>
+</div>
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span>Predio Habilitado para Licenciamiento</span>
+</div>
+</div>
+</div>
+<!-- Right 4 cols: Georeferencing Box (Dark Architectural Contrast Tier) -->
+<div class="lg:col-span-4 bg-inverse-surface text-inverse-on-surface p-7 md:p-8 rounded-lg shadow-md flex flex-col justify-between relative overflow-hidden">
+<div class="absolute -right-8 -bottom-8 w-36 h-36 rounded-full bg-primary-container/20 blur-2xl"></div>
+<div class="flex flex-col gap-4 relative z-10">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md uppercase tracking-widest text-primary-fixed-dim">Cartografía y Vértice</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-[20px]">explore</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm uppercase text-tertiary-fixed-dim">Sistema Oficial</p>
+<p class="font-body-md text-body-md text-on-primary-container font-medium mt-0.5">MAGNA-SIRGAS Origen Central</p>
+<p class="font-label-sm text-label-sm text-tertiary-fixed-dim">EPSG: 3116 · IGAC Boyacá</p>
+</div>
+<div class="space-y-2 pt-2">
+<div class="flex justify-between items-center py-1.5 px-3 rounded bg-white/5 font-mono text-body-sm text-body-sm">
+<span class="text-tertiary-fixed-dim font-label-sm">Coord. Norte (N)</span>
+<span class="font-semibold text-surface-bright">1.108.432,15 m</span>
+</div>
+<div class="flex justify-between items-center py-1.5 px-3 rounded bg-white/5 font-mono text-body-sm text-body-sm">
+<span class="text-tertiary-fixed-dim font-label-sm">Coord. Este (E)</span>
+<span class="font-semibold text-surface-bright">1.116.890,40 m</span>
+</div>
+<div class="flex justify-between items-center py-1.5 px-3 rounded bg-white/5 font-mono text-body-sm text-body-sm">
+<span class="text-tertiary-fixed-dim font-label-sm">Cota Altimétrica</span>
+<span class="font-semibold text-surface-bright">2.569 m.s.n.m.</span>
+</div>
+</div>
+</div>
+<div class="pt-4 mt-4 relative z-10 flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-tertiary-fixed-dim">Microzonificación Sísmica</span>
+<span class="px-2.5 py-1 rounded bg-secondary/40 text-secondary-fixed text-label-sm font-label-sm font-semibold">Zona Intermedia (Z-2)</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Visual Divider Accent with Editorial Stamp -->
+<div class="max-w-[1320px] mx-auto px-margin-mobile md:px-margin my-2">
+<div class="flex items-center gap-4">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold">01 // NORMATIVA URBANÍSTICA</span>
+<div class="h-px bg-surface-container-highest flex-1"></div>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-tertiary">POT SOGAMOSO ACUERDO 016/2016</span>
+</div>
+</div>
+<!-- Urban Indices & Building Limits (Capítulo II POT) -->
+<section class="w-full px-margin-mobile md:px-margin py-8">
+<div class="max-w-[1320px] mx-auto flex flex-col gap-6">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-3">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">
+              Índices Urbanísticos y Parámetros Volumétricos
+            </h2>
+<p class="font-body-md text-body-md text-tertiary mt-1">
+              Topes edificatorios reglamentarios para el Tratamiento de Consolidación Urbanística (Art. 142-155).
+            </p>
+</div>
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container font-label-sm text-label-sm text-on-surface-variant shrink-0">
+<span class="material-symbols-outlined text-primary text-[16px]">tune</span>
+<span>Régimen Obligatorio para Curaduría Urbana</span>
+</div>
+</div>
+<!-- Metric Bento Cards (Editorial styling with subtle tone shifts) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+<!-- Card 1: Índice de Ocupación -->
+<div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col justify-between relative overflow-hidden group">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold">Huella en Planta</span>
+<span class="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[16px]">crop_square</span>
+</span>
+</div>
+<div class="my-6">
+<div class="flex items-baseline gap-2">
+<span class="font-display-mobile md:font-display text-display-mobile md:text-display text-on-surface font-light leading-none">0.70</span>
+<span class="font-label-lg text-label-lg text-secondary font-medium">I.O. Máx</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary mt-2">
+                Porcentaje máximo construible en primer piso sobre el área neta del predio.
+              </p>
+</div>
+<div class="pt-4 bg-surface-container-low p-3.5 rounded-DEFAULT flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Huella máxima de ocupación:</span>
+<span class="font-label-md text-label-md text-primary font-bold">294.00 m²</span>
+</div>
+</div>
+<!-- Card 2: Índice de Construcción -->
+<div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col justify-between relative overflow-hidden group">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold">Edificabilidad Total</span>
+<span class="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[16px]">domain</span>
+</span>
+</div>
+<div class="my-6">
+<div class="flex items-baseline gap-2">
+<span class="font-display-mobile md:font-display text-display-mobile md:text-display text-on-surface font-light leading-none">2.80</span>
+<span class="font-label-lg text-label-lg text-secondary font-medium">I.C. Base</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary mt-2">
+                Relación total de metros cubiertos permitidos sumando la totalidad de pisos.
+              </p>
+</div>
+<div class="pt-4 bg-surface-container-low p-3.5 rounded-DEFAULT flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Área máxima cubierta:</span>
+<span class="font-label-md text-label-md text-primary font-bold">1,176.00 m²</span>
+</div>
+</div>
+<!-- Card 3: Altura Máxima Permitida -->
+<div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col justify-between relative overflow-hidden group">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold">Gálibo y Rasante</span>
+<span class="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[16px]">apartment</span>
+</span>
+</div>
+<div class="my-6">
+<div class="flex items-baseline gap-2">
+<span class="font-display-mobile md:font-display text-display-mobile md:text-display text-on-surface font-light leading-none">5</span>
+<span class="font-headline-sm text-headline-sm text-secondary font-medium">Pisos</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary mt-2">
+                Altura continua permitida por ancho de calzada (V-3) sin generar compensación.
+              </p>
+</div>
+<div class="pt-4 bg-surface-container-low p-3.5 rounded-DEFAULT flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Altura a cumbrera:</span>
+<span class="font-label-md text-label-md text-primary font-bold">16.50 metros</span>
+</div>
+</div>
+<!-- Card 4: Aislamiento Frontal -->
+<div class="bg-surface-container-low p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary font-semibold">Aislamiento Frontal</span>
+<span class="material-symbols-outlined text-primary text-[18px]">straighten</span>
+</div>
+<div class="my-4">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-lg text-headline-lg font-light text-on-surface">2.50</span>
+<span class="font-body-md text-body-md text-primary font-semibold">m</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary mt-1">
+                Antejardín obligatorio sin cerramiento opaco continuo. Cesión visual a perfil V-3.
+              </p>
+</div>
+<span class="inline-flex items-center gap-1 text-primary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+              Exento de parqueo en antejardín
+            </span>
+</div>
+<!-- Card 5: Aislamiento Posterior -->
+<div class="bg-surface-container-low p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary font-semibold">Aislamiento Posterior</span>
+<span class="material-symbols-outlined text-primary text-[18px]">space_dashboard</span>
+</div>
+<div class="my-4">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-lg text-headline-lg font-light text-on-surface">3.00</span>
+<span class="font-body-md text-body-md text-primary font-semibold">m</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary mt-1">
+                Patio posterior reglamentario continuo a cielo abierto a partir del piso 1.
+              </p>
+</div>
+<span class="inline-flex items-center gap-1 text-secondary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">info</span>
+              Inmodificable por servidumbres
+            </span>
+</div>
+<!-- Card 6: Aislamientos Laterales -->
+<div class="bg-surface-container-low p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary font-semibold">Aislamientos Laterales</span>
+<span class="material-symbols-outlined text-primary text-[18px]">unfold_more</span>
+</div>
+<div class="my-4">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-lg text-headline-lg font-light text-on-surface">2.50</span>
+<span class="font-body-md text-body-md text-primary font-semibold">m</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary mt-1">
+                Exigible a partir del piso 4. Adosamiento lateral continuo permitido en pisos 1 a 3.
+              </p>
+</div>
+<span class="inline-flex items-center gap-1 text-primary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">layers</span>
+              Retranqueo escalonado en altura
+            </span>
+</div>
+</div>
+</div>
+</section>
+<!-- Visual Schematic Section (Section Split with Vectorized Diagram & Urban Render) -->
+<section class="w-full px-margin-mobile md:px-margin py-6">
+<div class="max-w-[1320px] mx-auto bg-surface-container-lowest p-6 md:p-8 rounded-lg shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+<!-- Diagram Column (Left 7 cols) -->
+<div class="lg:col-span-7 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold">Corte Esquemático Volumétrico</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-0.5">Perfil Longitudinal y Retranqueos Permitidos</h3>
+</div>
+<span class="font-label-sm text-label-sm text-tertiary bg-surface-container px-3 py-1 rounded-full">Escala 1:150</span>
+</div>
+<!-- SVG Profile Diagram -->
+<div class="w-full bg-surface-container-low p-4 rounded-DEFAULT flex items-center justify-center">
+<svg class="w-full max-h-56 text-primary" fill="none" viewbox="0 0 600 240" xmlns="http://www.w3.org/2000/svg">
+<!-- Ground line -->
+<line stroke="currentColor" stroke-dasharray="4 4" stroke-opacity="0.3" stroke-width="2" x1="20" x2="580" y1="210" y2="210"></line>
+<text class="font-label-sm" fill="#5c5b64" font-size="10" x="25" y="228">Nivel Rasante ± 0.00 m (Calle 11)</text>
+<!-- Street Section V-3 -->
+<rect fill="#d2bcff" fill-opacity="0.25" height="10" rx="2" width="100" x="30" y="200"></rect>
+<text fill="#655090" font-size="9" font-weight="600" x="45" y="192">VÍA V-3 (12.0m)</text>
+<!-- Antejardin 2.5m -->
+<rect fill="#f5eaff" height="30" rx="2" width="35" x="135" y="180"></rect>
+<text fill="#75737d" font-size="8" x="137" y="172">Ant. 2.5m</text>
+<!-- Building Mass Pisos 1-3 (Adosado) -->
+<rect fill="#7e69ab" fill-opacity="0.15" height="120" rx="4" stroke="#655090" stroke-width="1.5" width="280" x="175" y="90"></rect>
+<line stroke="#655090" stroke-opacity="0.3" stroke-width="1" x1="175" x2="455" y1="130" y2="130"></line>
+<line stroke="#655090" stroke-opacity="0.3" stroke-width="1" x1="175" x2="455" y1="170" y2="170"></line>
+<text fill="#1f182a" font-size="11" font-weight="600" x="185" y="115">PISO 3 (Adosado)</text>
+<text fill="#1f182a" font-size="11" font-weight="600" x="185" y="155">PISO 2 (Adosado)</text>
+<text fill="#1f182a" font-size="11" font-weight="600" x="185" y="195">PISO 1 (Comercio / Acceso)</text>
+<!-- Building Mass Pisos 4-5 (Retranqueado 2.5m lateral y posterior) -->
+<rect fill="#655090" fill-opacity="0.3" height="60" rx="4" stroke="#655090" stroke-dasharray="2 2" stroke-width="1.5" width="220" x="210" y="30"></rect>
+<line stroke="#655090" stroke-opacity="0.3" stroke-width="1" x1="210" x2="430" y1="60" y2="60"></line>
+<text fill="#1f182a" font-size="10" font-weight="600" x="220" y="50">PISO 5 (Residencial H=16.50m)</text>
+<text fill="#1f182a" font-size="10" font-weight="600" x="220" y="78">PISO 4 (Aislamiento 2.50m)</text>
+<!-- Aislamiento posterior -->
+<rect fill="#eaddff" fill-opacity="0.4" height="70" rx="2" width="45" x="460" y="140"></rect>
+<text fill="#67548f" font-size="8" x="463" y="132">Patio 3.0m</text>
+<!-- Linderos -->
+<line stroke="#ba1a1a" stroke-dasharray="4 2" stroke-width="1" x1="175" x2="175" y1="20" y2="210"></line>
+<line stroke="#ba1a1a" stroke-dasharray="4 2" stroke-width="1" x1="505" x2="505" y1="20" y2="210"></line>
+<text fill="#ba1a1a" font-size="8" x="160" y="15">Paramento</text>
+<text fill="#ba1a1a" font-size="8" x="495" y="15">Lindero Post.</text>
+</svg>
+</div>
+<div class="flex items-center gap-4 text-tertiary font-body-sm text-body-sm">
+<span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-primary-container"></span> Volumetría Base</span>
+<span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-primary"></span> Retranqueos Superiores</span>
+<span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-secondary-fixed"></span> Cesión / Aislamientos</span>
+</div>
+</div>
+<!-- Editorial Photo Showcase (Right 5 cols) -->
+<div class="lg:col-span-5 flex flex-col gap-4">
+<div class="relative w-full h-72 rounded-lg overflow-hidden group shadow-md">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Modern contemporary architectural building facade in Sogamoso Colombia with refined concrete textures, clean lilac and neutral toned window frames, minimalist landscaped front garden setback, bright overcast Andean daylight, clean editorial architecture photography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQIVT7-V8m-0zVbGz-snKf5uqoDLGBXrikm6d55HkLURzgrFy5PHJeLs08AQTE_RX2lb6eIkeDZL2Od-txDdr_Uv4wTmsBaay_dS5l6840DqWeNlLK3Z2yQeJ4J47xsPI7hbGB8516cDOBEB2NHFnJhcKC7iLef-LWdrwwb3horSMMPTo2jlQHXMFuCZP1UAG25POKYyZ1bzfgSBrhsPdGGsKkw_4cjsOgSTaMQWLeHYCaFiKcq7U"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/80 via-transparent to-transparent flex flex-col justify-end p-5">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-surface-bright/80 font-medium">Referencia Tipológica Zonal</span>
+<p class="font-headline-sm text-headline-sm text-on-primary font-normal mt-0.5">Tipología Edilicia Continua Mixta</p>
+<p class="font-body-sm text-body-sm text-surface-bright/80 mt-1">Comercio activo en planta baja con 4 niveles de vivienda multifamiliar superior.</p>
+</div>
+<div class="absolute top-4 right-4 w-9 h-9 rounded-full bg-surface-container-lowest/90 backdrop-blur-md flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined text-[18px]">photo_camera</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Visual Divider Accent -->
+<div class="max-w-[1320px] mx-auto px-margin-mobile md:px-margin my-4">
+<div class="flex items-center gap-4">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold">02 // MATRIZ DE USOS DEL SUELO</span>
+<div class="h-px bg-surface-container-highest flex-1"></div>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-tertiary">CAPÍTULO III · ACUERDO 016</span>
+</div>
+</div>
+<!-- Matrix of Land Use Compatibility (Capítulo III POT) -->
+<section class="w-full px-margin-mobile md:px-margin py-8">
+<div class="max-w-[1320px] mx-auto flex flex-col gap-6">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-3">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">
+              Compatibilidad y Destinación de Usos
+            </h2>
+<p class="font-body-md text-body-md text-tertiary mt-1">
+              Evaluación pormenorizada de actividades permitidas, condicionadas y no admisibles para la Cl 11.
+            </p>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface font-semibold">Zona Residencial Mixta (ZRM)</span>
+</div>
+</div>
+<!-- 4-Column Editorial Comparison Matrix -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+<!-- 01 USO PRINCIPAL -->
+<div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between pb-3 border-b-0">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-bold">01 // USO PRINCIPAL</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-semibold">Pleno</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface leading-snug">
+                Vivienda Residencial
+              </h4>
+<p class="font-body-sm text-body-sm text-tertiary">
+                Destinación predominante amparada de forma directa sin requerimientos extraordinarios de mitigación.
+              </p>
+<div class="space-y-2.5 pt-2">
+<div class="p-3 rounded-DEFAULT bg-surface-container-low flex items-start gap-2.5">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">check_circle</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Multifamiliar en Altura</p>
+<p class="font-body-sm text-body-sm text-tertiary">Hasta 5 pisos bajo régimen de propiedad horizontal.</p>
+</div>
+</div>
+<div class="p-3 rounded-DEFAULT bg-surface-container-low flex items-start gap-2.5">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">check_circle</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Vivienda Unifamiliar / Bifamiliar</p>
+<p class="font-body-sm text-body-sm text-tertiary">Desarrollo continuo tradicional.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-6 mt-4">
+<span class="font-label-sm text-label-sm text-primary font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+                Sin impacto urbano adverso
+              </span>
+</div>
+</div>
+<!-- 02 COMPATIBLES -->
+<div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between pb-3">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary font-bold">02 // COMPATIBLES</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">Complementario</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface leading-snug">
+                Comercio y Servicios Básicos
+              </h4>
+<p class="font-body-sm text-body-sm text-tertiary">
+                Actividades de bajo impacto que suplen requerimientos cotidianos de los residentes circundantes.
+              </p>
+<div class="space-y-2.5 pt-2">
+<div class="p-3 rounded-DEFAULT bg-surface-container-low flex items-start gap-2.5">
+<span class="material-symbols-outlined text-secondary text-[18px] shrink-0 mt-0.5">storefront</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Comercio Local Grupo 1</p>
+<p class="font-body-sm text-body-sm text-tertiary">Farmacias, panaderías, papelerías (hasta 80 m²).</p>
+</div>
+</div>
+<div class="p-3 rounded-DEFAULT bg-surface-container-low flex items-start gap-2.5">
+<span class="material-symbols-outlined text-secondary text-[18px] shrink-0 mt-0.5">desk</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Servicios Profesionales</p>
+<p class="font-body-sm text-body-sm text-tertiary">Consultorios médicos sin hospitalización, bufetes.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-6 mt-4">
+<span class="font-label-sm text-label-sm text-secondary font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">task_alt</span>
+                Compatible en primer piso
+              </span>
+</div>
+</div>
+<!-- 03 CONDICIONADOS -->
+<div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between pb-3">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary-container font-bold">03 // CONDICIONADOS</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold">Mitigación</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface leading-snug">
+                Sujetos a Factibilidad
+              </h4>
+<p class="font-body-sm text-body-sm text-tertiary">
+                Requieren concepto técnico favorable de planeación y cumplimiento de protocolos de impacto ambiental.
+              </p>
+<div class="space-y-2.5 pt-2">
+<div class="p-3 rounded-DEFAULT bg-surface-container-low flex items-start gap-2.5">
+<span class="material-symbols-outlined text-primary-container text-[18px] shrink-0 mt-0.5">restaurant</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Restaurantes y Cafés</p>
+<p class="font-body-sm text-body-sm text-tertiary">Exige ductos certificados de humos y parqueos.</p>
+</div>
+</div>
+<div class="p-3 rounded-DEFAULT bg-surface-container-low flex items-start gap-2.5">
+<span class="material-symbols-outlined text-primary-container text-[18px] shrink-0 mt-0.5">fitness_center</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Gimnasios y Centros Fitness</p>
+<p class="font-body-sm text-body-sm text-tertiary">Condicionado a aislamiento acústico integral.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-6 mt-4">
+<span class="font-label-sm text-label-sm text-tertiary font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">rule</span>
+                Vía Plan de Regularización
+              </span>
+</div>
+</div>
+<!-- 04 PROHIBIDOS -->
+<div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between pb-3">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-error font-bold">04 // PROHIBIDOS</span>
+<span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">Veto Expreso</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface leading-snug">
+                Actividades Incompatibles
+              </h4>
+<p class="font-body-sm text-body-sm text-tertiary">
+                Veto legal insalvable. Generan saturación vehicular, ruido excesivo o afectación severa a la convivencia.
+              </p>
+<div class="space-y-2.5 pt-2">
+<div class="p-3 rounded-DEFAULT bg-error-container/20 flex items-start gap-2.5">
+<span class="material-symbols-outlined text-error text-[18px] shrink-0 mt-0.5">factory</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Industria Pesada y Mediana</p>
+<p class="font-body-sm text-body-sm text-tertiary">Prohibición absoluta en polígonos residenciales.</p>
+</div>
+</div>
+<div class="p-3 rounded-DEFAULT bg-error-container/20 flex items-start gap-2.5">
+<span class="material-symbols-outlined text-error text-[18px] shrink-0 mt-0.5">nightlife</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Bares, Discotecas y Cantinas</p>
+<p class="font-body-sm text-body-sm text-tertiary">Venta y consumo de licor no admitidos en el eje.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-6 mt-4">
+<span class="font-label-sm text-label-sm text-error font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">block</span>
+                Imposibilidad de Radicación
+              </span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Visual Divider Accent -->
+<div class="max-w-[1320px] mx-auto px-margin-mobile md:px-margin my-4">
+<div class="flex items-center gap-4">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold">03 // COMPENDIO LEGAL Y ARTICULADO</span>
+<div class="h-px bg-surface-container-highest flex-1"></div>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-tertiary">SECRETARÍA DE PLANEACIÓN SOGAMOSO</span>
+</div>
+</div>
+<!-- Legal Compendium Table -->
+<section class="w-full px-margin-mobile md:px-margin py-8">
+<div class="max-w-[1320px] mx-auto flex flex-col gap-6">
+<div class="bg-surface-container-lowest p-6 md:p-8 rounded-lg shadow-sm">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Articulado Aplicable de Obligatorio Cumplimiento</h3>
+<p class="font-body-sm text-body-sm text-tertiary">Trazabilidad jurídica para la elaboración de planos hidrosanitarios, estructurales y arquitectónicos.</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-4 py-2 rounded-full bg-surface-container-low text-primary font-label-md text-label-md hover:bg-surface-container transition-colors flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-[16px]">download</span>
+                Descargar Marco Jurídico (PDF)
+              </button>
+</div>
+</div>
+<!-- Structured Editorial Rows -->
+<div class="flex flex-col divide-y-0 gap-3">
+<!-- Item 1 -->
+<div class="p-4 rounded-DEFAULT bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<span class="font-label-lg text-label-lg font-semibold text-primary px-3 py-1 rounded-full bg-surface-container-lowest shrink-0">Art. 142</span>
+<div>
+<p class="font-label-lg text-label-lg text-on-surface font-semibold">Tratamiento Urbanístico de Consolidación Urbana</p>
+<p class="font-body-sm text-body-sm text-tertiary mt-0.5">Establece la preservación de la estructura predial existente posibilitando la renovación en altura condicionada a la capacidad de servicios públicos.</p>
+</div>
+</div>
+<div class="flex items-center gap-3 shrink-0">
+<span class="px-3 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm font-semibold">Conforme Pleno</span>
+<span class="material-symbols-outlined text-tertiary text-[18px]">verified</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="p-4 rounded-DEFAULT bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<span class="font-label-lg text-label-lg font-semibold text-primary px-3 py-1 rounded-full bg-surface-container-lowest shrink-0">Art. 155</span>
+<div>
+<p class="font-label-lg text-label-lg text-on-surface font-semibold">Régimen de Cesiones Públicas para Espacio Colectivo</p>
+<p class="font-body-sm text-body-sm text-tertiary mt-0.5">Predios mayores a 3 unidades habitacionales deben ceder 12.00 m² de espacio público por cada 80 m² construidos, compensables en dinero al Fondo Territorial.</p>
+</div>
+</div>
+<div class="flex items-center gap-3 shrink-0">
+<span class="px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">Compensable</span>
+<span class="material-symbols-outlined text-tertiary text-[18px]">currency_exchange</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="p-4 rounded-DEFAULT bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<span class="font-label-lg text-label-lg font-semibold text-primary px-3 py-1 rounded-full bg-surface-container-lowest shrink-0">Art. 172</span>
+<div>
+<p class="font-label-lg text-label-lg text-on-surface font-semibold">Estacionamientos y Cupos de Movilidad Sostenible</p>
+<p class="font-body-sm text-body-sm text-tertiary mt-0.5">Exigencia de 1 cupo vehicular por cada 2 unidades de vivienda multifamiliar + 1 cupo para bicicleta por cada unidad habitable proyectada.</p>
+</div>
+</div>
+<div class="flex items-center gap-3 shrink-0">
+<span class="px-3 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm font-semibold">Exigible en Diseño</span>
+<span class="material-symbols-outlined text-tertiary text-[18px]">directions_car</span>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="p-4 rounded-DEFAULT bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<span class="font-label-lg text-label-lg font-semibold text-primary px-3 py-1 rounded-full bg-surface-container-lowest shrink-0">Art. 210</span>
+<div>
+<p class="font-label-lg text-label-lg text-on-surface font-semibold">Protección de Corredores y Ejes Viales Colectores (V-3)</p>
+<p class="font-body-sm text-body-sm text-tertiary mt-0.5">Paramento estricto fijado en 2.50 metros de antejardín arborizado permeable no susceptible de cerramientos macizos superiores a 0.80 m.</p>
+</div>
+</div>
+<div class="flex items-center gap-3 shrink-0">
+<span class="px-3 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm font-semibold">Conforme Pleno</span>
+<span class="material-symbols-outlined text-tertiary text-[18px]">nature_people</span>
+</div>
+</div>
+<!-- Item 5 -->
+<div class="p-4 rounded-DEFAULT bg-surface-container-low hover:bg-surface-container transition-colors flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<span class="font-label-lg text-label-lg font-semibold text-primary px-3 py-1 rounded-full bg-surface-container-lowest shrink-0">Art. 248</span>
+<div>
+<p class="font-label-lg text-label-lg text-on-surface font-semibold">Mitigación de Ruidos e Impactos Visuales en Ejes Mixtos</p>
+<p class="font-body-sm text-body-sm text-tertiary mt-0.5">Los locales comerciales deberán contar con doble muro perimetral en colindancia con vestíbulos y cajas de escaleras residenciales.</p>
+</div>
+</div>
+<div class="flex items-center gap-3 shrink-0">
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold">Condicionado</span>
+<span class="material-symbols-outlined text-tertiary text-[18px]">volume_off</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Editorial Banner & Direct Next Action -->
+<section class="w-full px-margin-mobile md:px-margin pt-4 pb-12">
+<div class="max-w-[1320px] mx-auto bg-inverse-surface text-inverse-on-surface rounded-lg p-8 md:p-12 shadow-xl flex flex-col lg:flex-row items-center justify-between gap-8 relative overflow-hidden">
+<!-- Background light circle decoration -->
+<div class="absolute -right-24 -top-24 w-96 h-96 rounded-full bg-primary-container/20 blur-3xl pointer-events-none"></div>
+<div class="flex flex-col gap-3 max-w-2xl relative z-10 text-center lg:text-left">
+<div class="inline-flex items-center gap-2 justify-center lg:justify-start">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed animate-ping"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary-fixed-dim">Siguiente Fase Operativa</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg font-normal tracking-tight text-surface-bright">
+            ¿Desea evaluar su proyecto arquitectónico?
+          </h3>
+<p class="font-body-md text-body-md text-tertiary-fixed-dim">
+            Cargue su programa de áreas o calcule automáticamente las cesiones públicas, índice de habitabilidad y parqueaderos requeridos para radicación ante Curaduría Urbana de Sogamoso.
+          </p>
+</div>
+<div class="flex flex-col sm:flex-row items-center gap-4 relative z-10 shrink-0">
+<button class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-primary-fixed text-on-primary-fixed font-label-lg text-label-lg font-semibold hover:bg-surface-bright transition-all shadow-md" type="button">
+<span>Abrir Simulador de Cumplimiento</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+<button class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-white/10 text-inverse-on-surface font-label-lg text-label-lg hover:bg-white/15 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">calculate</span>
+<span>Calculadora de Cesiones</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+</div></main><footer class="w-full bg-surface-container-lowest mt-space-xl shadow-[0_-1px_12px_rgba(45,38,56,0.03)]"><div class="w-full px-margin py-space-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md"><div class="flex flex-col gap-1"><div class="flex items-center gap-space-xs"><span class="font-label-lg text-label-lg font-semibold tracking-wider uppercase text-on-surface">Geonorma Sogamoso</span><span class="text-tertiary-fixed-dim">·</span><span class="font-label-md text-label-md text-secondary">Sistema de Análisis Normativo Urbanístico</span></div><p class="font-body-sm text-body-sm text-tertiary max-w-2xl">Marco regulatorio oficial expedido bajo POT Acuerdo Municipal 016 de 2016, Ley 388 de 1997 de Desarrollo Territorial y concordantes para Curaduría Urbana y Secretaría de Planeación de Sogamoso, Boyacá.</p></div><div class="flex flex-col md:items-end gap-1"><div class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container-low font-label-sm text-label-sm text-on-surface-variant"><span class="material-symbols-outlined text-primary text-[14px]">public</span><span>Datum Oficial: MAGNA-SIRGAS Origen Central / EPSG 3116</span></div><span class="font-label-sm text-label-sm text-tertiary tracking-wide">Cartografía Georreferenciada © 2016 - 2024 Alcaldía de Sogamoso</span></div></div></footer></body></html>

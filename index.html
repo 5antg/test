@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Sogamoso POT Digital — Evaluación Urbanística y Normativa</title>
+  
+  <!-- Tipografías Oficiales Atelier Lilac: Outfit & Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  
+  <!-- Iconos Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  
+  <!-- Leaflet CSS para Mapas Interactivos -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "tertiary-fixed-dim": "#c8c5d0",
+            "outline-variant": "#cbc4d0",
+            "tertiary": "#5c5b64",
+            "on-primary": "#ffffff",
+            "surface-dim": "#e1d5ee",
+            "tertiary-container": "#75737d",
+            "on-background": "#1f182a",
+            "on-tertiary-container": "#fffbff",
+            "secondary-fixed-dim": "#d2bcfe",
+            "secondary-fixed": "#eaddff",
+            "on-secondary": "#ffffff",
+            "surface-container": "#f5eaff",
+            "on-error-container": "#93000a",
+            "primary-container": "#7e69ab",
+            "primary-fixed": "#eaddff",
+            "surface-container-low": "#faf0ff",
+            "on-primary-fixed": "#230c4c",
+            "surface-variant": "#eadef6",
+            "surface-container-high": "#f0e3fc",
+            "secondary": "#67548f",
+            "on-secondary-fixed-variant": "#4f3d75",
+            "error-container": "#ffdad6",
+            "on-tertiary-fixed": "#1b1b23",
+            "primary-fixed-dim": "#d2bcff",
+            "on-primary-container": "#fffbff",
+            "on-tertiary-fixed-variant": "#47464f",
+            "on-surface-variant": "#49454f",
+            "surface-tint": "#685393",
+            "on-error": "#ffffff",
+            "on-surface": "#1f182a",
+            "surface-container-lowest": "#ffffff",
+            "inverse-surface": "#342d3f",
+            "secondary-container": "#d2bcfe",
+            "tertiary-fixed": "#e4e1ed",
+            "error": "#ba1a1a",
+            "surface-bright": "#fef7ff",
+            "surface": "#fef7ff",
+            "inverse-on-surface": "#f7edff",
+            "on-secondary-fixed": "#220f47",
+            "inverse-primary": "#d2bcff",
+            "on-tertiary": "#ffffff",
+            "on-primary-fixed-variant": "#4f3b7a",
+            "background": "#fef7ff",
+            "surface-container-highest": "#eadef6",
+            "outline": "#7a7580",
+            "primary": "#655090",
+            "on-secondary-container": "#5b4882"
+          },
+          borderRadius: {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "space-md": "1.25rem",
+            "space-lg": "2.25rem",
+            "gutter-mobile": "1rem",
+            "margin": "3.5rem",
+            "space-sm": "0.75rem",
+            "space-xs": "0.375rem",
+            "space-xl": "4rem",
+            "gutter": "1.5rem",
+            "margin-mobile": "1.25rem"
+          },
+          fontFamily: {
+            "body-md": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-lg": ["Outfit", "sans-serif"],
+            "headline-md": ["Outfit", "sans-serif"],
+            "headline-sm": ["Outfit", "sans-serif"],
+            "label-lg": ["Outfit", "sans-serif"],
+            "label-md": ["Outfit", "sans-serif"],
+            "label-sm": ["Outfit", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+    }
+    .leaflet-popup-content-wrapper {
+      border-radius: 1rem;
+      background: #fef7ff;
+      box-shadow: 0 10px 25px -5px rgba(101,80,144,0.15);
+    }
+    @media print {
+      header, .no-print { display: none !important; }
+      main { padding-top: 0 !important; }
+      .tab-view-container { display: block !important; page-break-after: always; }
+    }
+  </style>
+</head>
+<body class="bg-background font-body-md text-on-surface antialiased selection:bg-secondary-container selection:text-on-secondary-container min-h-screen flex flex-col">
+
+  <!-- ========================================================================
+       BARRA DE NAVEGACIÓN SUPERIOR FIJA
+       ======================================================================== -->
+  <header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(45,38,56,0.04)]">
+    <div class="h-20 w-full px-4 lg:px-margin flex items-center justify-between gap-space-md">
+      
+      <!-- Brand & Active Predio Pill -->
+      <div class="flex items-center gap-space-md shrink-0">
+        <div class="flex items-center gap-space-xs cursor-pointer" onclick="window.switchTab('explorador')">
+          <span class="text-primary font-headline-sm text-[18px] lg:text-[20px] font-bold tracking-tight">SOGAMOSO POT</span>
+          <span class="text-tertiary-fixed-dim font-headline-sm">//</span>
+          <span class="font-label-lg text-label-lg tracking-widest uppercase text-on-surface-variant font-medium hidden sm:inline">DIGITAL</span>
+          <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface-container-high text-primary font-label-sm ml-space-xs">✻</span>
+        </div>
+        
+        <div class="hidden xl:flex items-center gap-space-xs px-space-sm py-1.5 rounded-full bg-surface-container-low max-w-md truncate">
+          <span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0 animate-pulse"></span>
+          <span id="header-active-predio-pill" class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant truncate">
+            Sogamoso · Sector 01 El Rosario · Cl 11 # 14-25 (420.00 m²)
+          </span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs (Pestañas) -->
+      <nav data-main-nav class="hidden lg:flex items-center gap-1 p-1 rounded-full bg-surface-container-lowest/80 border border-surface-variant/40 shadow-sm">
+        <a aria-current="page" class="px-space-md py-2 transition-all duration-200 bg-surface-container-highest text-primary font-medium rounded-full shadow-sm" data-path="explorador" href="#">Explorador Urbano</a>
+        <a class="px-space-md py-2 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200" data-path="ficha" href="#">Ficha Normativa</a>
+        <a class="px-space-md py-2 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200" data-path="simulador" href="#">Simulador</a>
+        <a class="px-space-md py-2 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200" data-path="cesiones" href="#">Cesiones</a>
+        <a class="px-space-md py-2 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200" data-path="planoteca" href="#">Planoteca POT</a>
+      </nav>
+
+      <!-- Right Header Actions -->
+      <div class="flex items-center gap-space-sm shrink-0">
+        <div class="hidden sm:flex items-center gap-space-xs px-space-sm py-2 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md">
+          <span class="material-symbols-outlined text-primary text-[18px]">gavel</span>
+          <span class="font-medium">POT Ac. 029/2016</span>
+        </div>
+
+        <button data-export-dossier-pdf class="inline-flex items-center gap-space-xs px-space-md py-2.5 rounded-full bg-primary text-on-primary font-label-lg text-label-lg hover:bg-primary-container hover:text-on-primary-container transition-all shadow-[0_4px_16px_-2px_rgba(101,80,144,0.25)]" type="button">
+          <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+          <span class="hidden sm:inline">Exportar Dossier PDF</span>
+          <span class="material-symbols-outlined text-[16px]">north_east</span>
+        </button>
+
+        <!-- User / History Button -->
+        <button id="btn-open-user-modal" class="w-9 h-9 rounded-full bg-surface-container-high text-primary hover:bg-primary hover:text-white transition-all flex items-center justify-center shrink-0 shadow-sm" title="Historial y Cuenta">
+          <span class="material-symbols-outlined text-[20px]">person</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       CONTENIDO PRINCIPAL: 5 PESTAÑAS INTERACTIVAS
+       ======================================================================== -->
+  <main class="w-full pt-20 flex-1">
+
+    <!-- ====================================================================
+         PESTAÑA 1: EXPLORADOR URBANO (SIG & MAPA DE SOGAMOSO)
+         ==================================================================== -->
+    <div id="tab-explorador" class="tab-view-container flex flex-col w-full">
+      <!-- Sub-header Editorial Tracker -->
+      <section class="w-full px-4 lg:px-margin pt-4 pb-2">
+        <div class="max-w-[1360px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-space-sm bg-surface-container-lowest/90 backdrop-blur-md rounded-2xl p-space-sm px-space-md shadow-sm border border-surface-variant/30">
+          <div class="flex flex-wrap items-center gap-space-xs text-on-surface-variant">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-fixed/50 text-secondary font-label-sm text-label-sm uppercase tracking-wider">
+              <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+              Geovisor Activo
+            </span>
+            <span class="text-tertiary-fixed-dim">/</span>
+            <span class="font-label-md text-label-md text-on-surface font-medium">Sogamoso, Boyacá</span>
+            <span class="text-tertiary-fixed-dim">·</span>
+            <span class="font-body-sm text-body-sm text-tertiary">Casco Urbano · Sistema Oficial POT 2016</span>
+          </div>
+          <div class="flex items-center gap-space-xs shrink-0">
+            <span class="font-label-sm text-label-sm text-tertiary uppercase tracking-wider hidden sm:inline">Datum:</span>
+            <span class="px-2 py-0.5 rounded-full bg-surface-container font-label-sm text-label-sm text-primary font-medium">MAGNA Origen Central</span>
+            <div class="h-4 w-px bg-surface-variant"></div>
+            <span class="font-label-sm text-label-sm text-on-surface-variant font-medium">EPSG: 3116</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main GIS Workspace -->
+      <section class="w-full px-4 lg:px-margin py-space-sm">
+        <div class="max-w-[1360px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-space-md items-start">
+          
+          <!-- LEFT HUD: Búsqueda y Capas Normativas (4 columnas) -->
+          <div class="lg:col-span-4 flex flex-col gap-space-md">
+            
+            <!-- Search Card -->
+            <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-variant/40 flex flex-col gap-space-sm">
+              <div class="flex items-center justify-between">
+                <span class="font-label-sm text-label-sm text-primary uppercase tracking-widest font-semibold flex items-center gap-1.5">
+                  <span>✻</span> Localización de Predio
+                </span>
+                <span class="text-tertiary font-label-sm text-label-sm">POT Sogamoso</span>
+              </div>
+              
+              <!-- Barra de Búsqueda -->
+              <div class="relative w-full">
+                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-tertiary text-[20px]">search</span>
+                <input id="main-search-input" class="w-full pl-11 pr-24 py-2.5 rounded-full bg-surface-container-low font-body-sm text-body-sm text-on-surface placeholder:text-outline-variant focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all" placeholder="Buscar dirección, barrio o cédula..." type="text" value="Calle 11 # 14-25, Sogamoso"/>
+                <button id="main-search-btn" class="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1 rounded-full bg-primary text-on-primary font-label-sm text-label-sm hover:bg-primary-container transition-all">
+                  Buscar
+                </button>
+              </div>
+
+              <!-- Quick Presets -->
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <span class="text-[11px] text-tertiary uppercase font-label-sm tracking-wider w-full">Ejemplos típicos en Sogamoso:</span>
+                <button onclick="window.selectPreset('predio-rosario')" class="px-2.5 py-1 rounded-full bg-surface-container text-primary font-label-sm text-label-sm hover:bg-primary hover:text-white transition-all">
+                  El Rosario (Mixto)
+                </button>
+                <button onclick="window.selectPreset('predio-mochaca')" class="px-2.5 py-1 rounded-full bg-surface-container text-primary font-label-sm text-label-sm hover:bg-primary hover:text-white transition-all">
+                  Mochacá (Patrimonio)
+                </button>
+                <button onclick="window.selectPreset('predio-cataluna')" class="px-2.5 py-1 rounded-full bg-surface-container text-primary font-label-sm text-label-sm hover:bg-primary hover:text-white transition-all">
+                  Cataluña (Torre Alta)
+                </button>
+              </div>
+
+              <!-- Identificadores Rápidos -->
+              <div class="flex flex-col gap-1.5 pt-2 border-t border-surface-variant/30">
+                <div class="flex items-center justify-between py-1 px-2.5 rounded-xl bg-surface-container-low text-tertiary font-label-sm text-label-sm">
+                  <span>Cédula Catastral (30d):</span>
+                  <span id="hud-cedula-catastral" class="font-mono text-on-surface font-medium select-all">157590102000000340012000</span>
+                </div>
+                <div class="flex items-center justify-between py-1 px-2.5 rounded-xl bg-surface-container-low text-tertiary font-label-sm text-label-sm">
+                  <span>Código Manzana / Lote:</span>
+                  <span id="hud-manzana-lote" class="text-primary font-medium">MZ-034 · LOTE-012</span>
+                </div>
+              </div>
+
+              <!-- Status Pill -->
+              <div class="flex items-center gap-2 p-2.5 rounded-xl bg-surface-container-high/60">
+                <span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+                <div class="flex flex-col">
+                  <span class="font-label-md text-label-md text-on-surface font-semibold">Suelo Urbano Consolidado</span>
+                  <span class="font-body-sm text-[11px] leading-tight text-tertiary">Amenaza Natural: Baja (Área apta para construcción)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Capas Normativas y Equipamientos -->
+            <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-variant/40 flex flex-col gap-space-md">
+              <div class="flex items-center justify-between pb-1">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-[20px]">layers</span>
+                  <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Capas POT Sogamoso</h3>
+                </div>
+                <span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-medium">4 Activas</span>
+              </div>
+
+              <!-- Layer Toggles -->
+              <div class="flex flex-col gap-2">
+                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low">
+                  <div class="flex items-center gap-2.5">
+                    <span class="w-3.5 h-3.5 rounded-md bg-primary shrink-0"></span>
+                    <span class="font-label-md text-label-md text-on-surface">Usos de Suelo (CAM / Residencial)</span>
+                  </div>
+                  <input checked type="checkbox" class="accent-primary"/>
+                </div>
+                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low">
+                  <div class="flex items-center gap-2.5">
+                    <span class="w-3.5 h-3.5 rounded-md bg-secondary shrink-0"></span>
+                    <span class="font-label-md text-label-md text-on-surface">Tratamientos Urbanísticos (UTD)</span>
+                  </div>
+                  <input checked type="checkbox" class="accent-secondary"/>
+                </div>
+                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low">
+                  <div class="flex items-center gap-2.5">
+                    <span class="w-3.5 h-3.5 rounded-md bg-emerald-600 shrink-0"></span>
+                    <span class="font-label-md text-label-md text-on-surface">Malla Vial Arterial & Colectoras</span>
+                  </div>
+                  <input checked type="checkbox" class="accent-emerald-600"/>
+                </div>
+              </div>
+
+              <!-- Equipamientos Cercanos -->
+              <div class="pt-2 flex flex-col gap-2">
+                <span class="font-label-sm text-label-sm text-tertiary uppercase tracking-wider font-semibold">Equipamientos en Radio 500-1000m</span>
+                <div class="grid grid-cols-1 gap-1.5">
+                  <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-surface-container text-body-sm">
+                    <div class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-primary text-[16px]">park</span>
+                      <span class="font-medium text-on-surface">Parque El Laguito</span>
+                    </div>
+                    <span class="font-label-sm text-label-sm text-secondary font-semibold">380 m</span>
+                  </div>
+                  <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-surface-container text-body-sm">
+                    <div class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-primary text-[16px]">storefront</span>
+                      <span class="font-medium text-on-surface">Plaza de Mercado Central</span>
+                    </div>
+                    <span class="font-label-sm text-label-sm text-secondary font-semibold">620 m</span>
+                  </div>
+                  <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-surface-container text-body-sm">
+                    <div class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-primary text-[16px]">local_hospital</span>
+                      <span class="font-medium text-on-surface">Hospital Regional de Sogamoso</span>
+                    </div>
+                    <span class="font-label-sm text-label-sm text-secondary font-semibold">850 m</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CENTER & RIGHT: Visor Cartográfico (8 columnas) -->
+          <div class="lg:col-span-8 flex flex-col gap-space-md relative">
+            <div class="w-full bg-surface-container-lowest rounded-3xl p-4 sm:p-6 shadow-sm border border-surface-variant/40 overflow-hidden relative">
+              
+              <!-- Map Controls Header -->
+              <div class="flex flex-wrap items-center justify-between gap-3 mb-4 z-10 relative">
+                <div class="flex items-center gap-2">
+                  <span id="map-mode-label" class="font-headline-sm text-headline-sm font-semibold text-on-surface tracking-tight">Mapa Satelital / Urbano (Leaflet)</span>
+                  <span class="px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">Sogamoso Real</span>
+                </div>
+                
+                <!-- Toggle Map Mode & Zooms -->
+                <div class="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-full shadow-sm">
+                  <button id="btn-toggle-map-mode" class="px-3 py-1 rounded-full text-label-sm bg-surface-container-highest text-primary font-medium hover:bg-primary hover:text-white transition-all flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[15px]">sync_alt</span>
+                    <span>Alternar Plano CAD</span>
+                  </button>
+                  <div class="h-4 w-px bg-surface-variant"></div>
+                  <button id="btn-map-zoom-in" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-on-surface transition-all" title="Acercar">
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                  </button>
+                  <button id="btn-map-zoom-out" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-on-surface transition-all" title="Alejar">
+                    <span class="material-symbols-outlined text-[18px]">remove</span>
+                  </button>
+                  <button id="btn-map-recenter" class="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-on-primary shadow-sm hover:bg-primary-container transition-all" title="Centrar Predio">
+                    <span class="material-symbols-outlined text-[16px]">my_location</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Map Viewport -->
+              <div class="w-full h-[580px] rounded-2xl relative overflow-hidden flex items-center justify-center">
+                
+                <!-- 1. Leaflet Interactive Map Container -->
+                <div id="leaflet-map-wrapper" class="w-full h-full relative">
+                  <div id="leaflet-map" class="w-full h-full z-0"></div>
+                </div>
+
+                <!-- 2. CAD SVG Map Container (Alternable) -->
+                <div id="svg-map-wrapper" class="w-full h-full hidden bg-surface-container-low">
+                  <svg class="w-full h-full object-cover select-none" fill="none" viewBox="0 0 880 580" xmlns="http://www.w3.org/2000/svg">
+                    <rect fill="#faf0ff" height="580" width="880"></rect>
+                    <!-- Manzana 034 Sogamoso -->
+                    <rect fill="#ffffff" height="260" rx="8" stroke="#7a7580" stroke-width="1.2" width="420" x="180" y="220"></rect>
+                    <!-- Predio Objetivo -->
+                    <rect fill="#d2bcff" fill-opacity="0.5" height="130" rx="4" stroke="#655090" stroke-width="2.5" width="100" x="320" y="220"></rect>
+                    <line stroke="#ba1a1a" stroke-dasharray="3,3" stroke-width="1.2" x1="320" x2="420" y1="330" y2="330"></line>
+                    <text fill="#655090" font-family="Outfit" font-size="11" font-weight="700" x="350" y="206">14.00 m (Frente)</text>
+                    <text fill="#655090" font-family="Outfit" font-size="11" font-weight="700" x="250" y="290">30.00 m (Fondo)</text>
+                    <circle cx="370" cy="275" fill="#655090" r="18"></circle>
+                    <text fill="#ffffff" font-family="Outfit" font-size="10" font-weight="700" text-anchor="middle" x="370" y="278">LOTE</text>
+                    <text fill="#1f182a" font-family="Plus Jakarta Sans" font-size="9" font-weight="600" text-anchor="middle" x="370" y="298">420.00 m²</text>
+                    <!-- Calles -->
+                    <text fill="#4f3d75" font-family="Outfit" font-size="12" font-weight="600" x="280" y="195">CALLE 11 (EJE COMERCIAL CAM-2 // ANCHO 12.00 M)</text>
+                  </svg>
+                </div>
+
+                <!-- Floating Diagnosis HUD Card -->
+                <div class="absolute top-4 right-4 max-w-[320px] w-full bg-surface-container-lowest/95 backdrop-blur-xl rounded-2xl p-space-md shadow-xl flex flex-col gap-3 border border-surface-variant/40 z-20">
+                  <div class="flex items-center justify-between">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-semibold tracking-wide uppercase">
+                      <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                      DIAGNÓSTICO // VIABLE
+                    </span>
+                    <span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+                  </div>
+                  <div>
+                    <h4 id="diag-card-address" class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-tight">Calle 11 # 14-25</h4>
+                    <p id="diag-card-subtitle" class="font-body-sm text-body-sm text-tertiary">El Rosario · Manzana 034 · Lote 012</p>
+                  </div>
+                  <div class="grid grid-cols-3 gap-2 py-2 bg-surface-container-low rounded-xl p-2 text-center">
+                    <div class="flex flex-col">
+                      <span class="font-label-sm text-[10px] text-tertiary uppercase">Área Lote</span>
+                      <span id="diag-card-area" class="font-headline-sm text-[15px] text-primary font-bold">420 m²</span>
+                    </div>
+                    <div class="flex flex-col border-x border-surface-variant">
+                      <span class="font-label-sm text-[10px] text-tertiary uppercase">Frente</span>
+                      <span id="diag-card-frente" class="font-headline-sm text-[15px] text-on-surface font-semibold">14.00 m</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="font-label-sm text-[10px] text-tertiary uppercase">Fondo</span>
+                      <span id="diag-card-fondo" class="font-headline-sm text-[15px] text-on-surface font-semibold">30.00 m</span>
+                    </div>
+                  </div>
+                  <div class="flex flex-col gap-1.5 font-body-sm text-body-sm">
+                    <div class="flex items-center justify-between pb-1 border-b border-surface-variant/30">
+                      <span class="text-tertiary font-label-sm text-[11px]">Zonificación</span>
+                      <span id="diag-card-zonif" class="font-label-md text-label-md text-on-surface font-medium truncate max-w-[170px]">CAM-2 (Mixto)</span>
+                    </div>
+                    <div class="flex items-center justify-between pb-1 border-b border-surface-variant/30">
+                      <span class="text-tertiary font-label-sm text-[11px]">Tratamiento</span>
+                      <span id="diag-card-tratamiento" class="font-label-md text-label-md text-on-surface font-medium truncate max-w-[170px]">Consolidación (TU-2)</span>
+                    </div>
+                    <div class="flex items-center justify-between pb-1 border-b border-surface-variant/30">
+                      <span class="text-tertiary font-label-sm text-[11px]">Altura Permitida</span>
+                      <span id="diag-card-altura" class="font-label-md text-label-md text-primary font-semibold">5 Pisos (16.50 m)</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span class="text-tertiary font-label-sm text-[11px]">Aislamiento Post.</span>
+                      <span id="diag-card-aislamiento" class="font-label-md text-label-md text-on-surface font-medium">Exigido 3.00 m</span>
+                    </div>
+                  </div>
+                  <button data-switch-to="ficha" class="mt-1 w-full inline-flex items-center justify-center gap-2 py-2 px-4 rounded-full bg-primary text-on-primary font-label-md text-label-md tracking-wider uppercase font-semibold hover:bg-primary-container transition-all shadow-sm">
+                    <span>Ver Ficha Normativa</span>
+                    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                  </button>
+                </div>
+
+                <!-- Coords Chip -->
+                <div class="absolute bottom-4 left-4 bg-surface-container-lowest/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm flex items-center gap-2 font-label-sm text-label-sm text-tertiary z-20">
+                  <span class="w-2 h-2 rounded-full bg-primary"></span>
+                  <span id="hud-coords-text" class="font-mono text-on-surface">5°42'58.3"N 72°55'57.0"W</span>
+                  <span class="text-tertiary-fixed-dim">|</span>
+                  <span>Sogamoso · Boyacá</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ====================================================================
+         PESTAÑA 2: FICHA NORMATIVA DEL PREDIO
+         ==================================================================== -->
+    <div id="tab-ficha" class="tab-view-container hidden flex flex-col w-full px-4 lg:px-margin py-space-md">
+      <div class="max-w-[1320px] mx-auto flex flex-col gap-6 w-full">
+        
+        <!-- Top Status Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-4 bg-surface-container-low/70 p-4 rounded-2xl border border-surface-variant/40 shadow-sm">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm tracking-widest uppercase font-semibold">
+              <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+              Ficha Normativa Oficial POT 2016
+            </span>
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+              <span class="material-symbols-outlined text-[14px] text-primary">gavel</span>
+              Acuerdo 029 de 2016
+            </span>
+            <span id="ficha-meta-matricula" class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+              Matrícula: 095-481920
+            </span>
+          </div>
+          <button data-switch-to="simulador" class="px-4 py-1.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm hover:bg-primary-container transition-all flex items-center gap-1">
+            <span>Simular en este Predio</span>
+            <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+          </button>
+        </div>
+
+        <!-- Hero Bento Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          
+          <!-- Left 8 cols: Datos del Predio -->
+          <div class="lg:col-span-8 bg-surface-container-lowest p-6 sm:p-8 rounded-3xl border border-surface-variant/40 shadow-sm flex flex-col justify-between">
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center gap-2 text-primary font-label-md text-label-md uppercase tracking-wider">
+                <span class="material-symbols-outlined text-[18px]">location_on</span>
+                <span>Predio Urbano Seleccionado</span>
+              </div>
+              <h1 id="ficha-title-address" class="font-headline-lg text-[28px] sm:text-[34px] font-bold text-on-surface tracking-tight">
+                Calle 11 # 14-25 <span class="text-primary font-normal italic">· El Rosario</span>
+              </h1>
+              <p id="ficha-subtitle-loc" class="font-body-md text-body-md text-tertiary">
+                Comuna 02 Sugamuxi · Sogamoso (Boyacá) · Perfil Vía Colectora V-3
+              </p>
+            </div>
+
+            <!-- Key Metric Chips -->
+            <div class="pt-6 mt-4 grid grid-cols-3 gap-3 border-t border-surface-variant/30">
+              <div class="p-3 rounded-2xl bg-surface-container-low flex flex-col">
+                <span class="font-label-sm text-[11px] uppercase tracking-wider text-tertiary">Área de Terreno</span>
+                <div class="flex items-baseline gap-1 mt-0.5">
+                  <span id="ficha-metric-area" class="font-headline-sm text-[22px] font-bold text-on-surface">420.00</span>
+                  <span class="font-label-sm text-primary font-medium">m²</span>
+                </div>
+              </div>
+              <div class="p-3 rounded-2xl bg-surface-container-low flex flex-col">
+                <span class="font-label-sm text-[11px] uppercase tracking-wider text-tertiary">Frente de Lote</span>
+                <div class="flex items-baseline gap-1 mt-0.5">
+                  <span id="ficha-metric-frente" class="font-headline-sm text-[22px] font-bold text-on-surface">14.00</span>
+                  <span class="font-label-sm text-primary font-medium">ml</span>
+                </div>
+              </div>
+              <div class="p-3 rounded-2xl bg-surface-container-low flex flex-col">
+                <span class="font-label-sm text-[11px] uppercase tracking-wider text-tertiary">Fondo de Lote</span>
+                <div class="flex items-baseline gap-1 mt-0.5">
+                  <span id="ficha-metric-fondo" class="font-headline-sm text-[22px] font-bold text-on-surface">30.00</span>
+                  <span class="font-label-sm text-primary font-medium">ml</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right 4 cols: Georreferenciación & Tratamiento -->
+          <div class="lg:col-span-4 bg-inverse-surface text-inverse-on-surface p-6 sm:p-8 rounded-3xl shadow-md flex flex-col justify-between">
+            <div class="flex flex-col gap-3">
+              <span class="font-label-sm text-label-sm uppercase tracking-widest text-primary-fixed-dim font-semibold">Sistema Geodésico Oficial</span>
+              <h3 class="font-headline-sm text-[18px] text-surface-bright font-bold">MAGNA-SIRGAS Origen Central</h3>
+              <p class="font-body-sm text-[12px] text-tertiary-fixed-dim">Cartografía homologada del Acuerdo 029/2016 de Sogamoso (EPSG 3116).</p>
+              
+              <div class="space-y-2 pt-2">
+                <div class="p-2.5 rounded-xl bg-white/5 flex justify-between items-center text-[12px]">
+                  <span class="text-tertiary-fixed-dim">Tratamiento:</span>
+                  <span class="font-semibold text-secondary-fixed">Consolidación (TU-2)</span>
+                </div>
+                <div class="p-2.5 rounded-xl bg-white/5 flex justify-between items-center text-[12px]">
+                  <span class="text-tertiary-fixed-dim">Zonificación:</span>
+                  <span class="font-semibold text-primary-fixed-dim">CAM-2 (Mixto)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Parámetros Volumétricos & Matriz de Usos (2 Columnas) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <!-- Índices y Alturas (6 cols) -->
+          <div class="lg:col-span-6 bg-surface-container-lowest p-6 sm:p-8 rounded-3xl border border-surface-variant/40 shadow-sm flex flex-col gap-4">
+            <div class="flex items-center gap-2 pb-2 border-b border-surface-variant/30">
+              <span class="material-symbols-outlined text-primary text-[22px]">straighten</span>
+              <h3 class="font-headline-sm text-[20px] font-bold text-on-surface">Norma Volumétrica Reglamentaria</h3>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div class="p-3.5 rounded-2xl bg-surface-container-low flex flex-col">
+                <span class="font-label-sm text-[11px] text-tertiary uppercase font-medium">Índice Ocupación Máx (IO)</span>
+                <span id="ficha-norma-io" class="font-headline-sm text-[17px] font-bold text-primary mt-1">70% (294.00 m²)</span>
+                <span class="font-body-sm text-[11px] text-tertiary mt-0.5">Art. 184 Acuerdo 029/2016</span>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-surface-container-low flex flex-col">
+                <span class="font-label-sm text-[11px] text-tertiary uppercase font-medium">Índice Construcción (IC)</span>
+                <span id="ficha-norma-ic" class="font-headline-sm text-[17px] font-bold text-primary mt-1">2.80x (1,176.00 m²)</span>
+                <span class="font-body-sm text-[11px] text-tertiary mt-0.5">Art. 186 Acuerdo 029/2016</span>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-surface-container-low flex flex-col">
+                <span class="font-label-sm text-[11px] text-tertiary uppercase font-medium">Altura Máxima Permitida</span>
+                <span id="ficha-norma-pisos" class="font-headline-sm text-[17px] font-bold text-on-surface mt-1">Hasta 5 pisos (16.50 m)</span>
+                <span class="font-body-sm text-[11px] text-tertiary mt-0.5">Art. 192 Acuerdo 029/2016</span>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-surface-container-low flex flex-col">
+                <span class="font-label-sm text-[11px] text-tertiary uppercase font-medium">Aislamiento Posterior</span>
+                <span id="ficha-norma-aisl-post" class="font-headline-sm text-[17px] font-bold text-on-surface mt-1">Mínimo 3.00 m</span>
+                <span class="font-body-sm text-[11px] text-tertiary mt-0.5">Art. 198 Acuerdo 029/2016</span>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-surface-container-low flex flex-col">
+                <span class="font-label-sm text-[11px] text-tertiary uppercase font-medium">Antejardín Exigido</span>
+                <span id="ficha-norma-antejardin" class="font-headline-sm text-[17px] font-bold text-on-surface mt-1">Mínimo 2.50 m</span>
+                <span class="font-body-sm text-[11px] text-tertiary mt-0.5">Según Perfil V-3</span>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-surface-container-low flex flex-col">
+                <span class="font-label-sm text-[11px] text-tertiary uppercase font-medium">Voladizo Máximo</span>
+                <span id="ficha-norma-voladizo" class="font-headline-sm text-[17px] font-bold text-on-surface mt-1">Máximo 0.80 m</span>
+                <span class="font-body-sm text-[11px] text-tertiary mt-0.5">Sobre vía pública</span>
+              </div>
+            </div>
+
+            <!-- Descripciones oficiales -->
+            <div class="p-3 rounded-2xl bg-surface-container flex flex-col gap-1 text-[12px]">
+              <span id="ficha-desc-tratamiento" class="font-medium text-on-surface">Consolidación Urbana (TU-2): Mantenimiento de la estructura predial existente.</span>
+              <span id="ficha-desc-zonificacion" class="text-tertiary">CAM-2: Corredor de actividad mixta con comercio en primeros pisos y vivienda en altura.</span>
+            </div>
+          </div>
+
+          <!-- Matriz de Usos del Suelo (6 cols) -->
+          <div class="lg:col-span-6 bg-surface-container-lowest p-6 sm:p-8 rounded-3xl border border-surface-variant/40 shadow-sm flex flex-col gap-4">
+            <div class="flex items-center gap-2 pb-2 border-b border-surface-variant/30">
+              <span class="material-symbols-outlined text-primary text-[22px]">category</span>
+              <h3 class="font-headline-sm text-[20px] font-bold text-on-surface">Matriz de Usos del Suelo</h3>
+            </div>
+
+            <div class="space-y-3">
+              <div>
+                <span class="font-label-sm text-label-sm uppercase font-semibold text-emerald-800 flex items-center gap-1.5 mb-1">
+                  <span class="w-2 h-2 rounded-full bg-emerald-600"></span> Usos Permitidos
+                </span>
+                <ul id="ficha-usos-permitidos" class="space-y-1 pl-1"></ul>
+              </div>
+
+              <div>
+                <span class="font-label-sm text-label-sm uppercase font-semibold text-primary flex items-center gap-1.5 mb-1">
+                  <span class="w-2 h-2 rounded-full bg-primary"></span> Usos Compatibles
+                </span>
+                <ul id="ficha-usos-compatibles" class="space-y-1 pl-1"></ul>
+              </div>
+
+              <div>
+                <span class="font-label-sm text-label-sm uppercase font-semibold text-amber-800 flex items-center gap-1.5 mb-1">
+                  <span class="w-2 h-2 rounded-full bg-amber-600"></span> Usos Condicionados
+                </span>
+                <ul id="ficha-usos-condicionados" class="space-y-1 pl-1"></ul>
+              </div>
+
+              <div>
+                <span class="font-label-sm text-label-sm uppercase font-semibold text-red-800 flex items-center gap-1.5 mb-1">
+                  <span class="w-2 h-2 rounded-full bg-red-600"></span> Usos Prohibidos
+                </span>
+                <ul id="ficha-usos-prohibidos" class="space-y-1 pl-1"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         PESTAÑA 3: SIMULADOR Y VERIFICACIÓN DE CUMPLIMIENTO
+         ==================================================================== -->
+    <div id="tab-simulador" class="tab-view-container hidden flex flex-col w-full px-4 lg:px-margin py-space-md">
+      <div class="max-w-[1320px] mx-auto flex flex-col gap-6 w-full">
+        
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface-container-low/70 p-4 rounded-2xl border border-surface-variant/40 shadow-sm">
+          <div class="flex items-center gap-3">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-secondary-fixed text-primary font-bold">✻</span>
+            <div>
+              <h1 class="font-headline-sm text-[20px] font-bold text-on-surface">Simulador y Verificación de Cumplimiento</h1>
+              <span class="font-body-sm text-[12px] text-tertiary">Semaforización técnica bajo el Acuerdo 029 de 2016</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="sim-header-predio-code" class="px-3 py-1 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-semibold">
+              Predio: MZ-034 · LOTE-012
+            </span>
+            <span id="sim-header-area" class="px-3 py-1 rounded-full bg-surface-container-lowest shadow-sm text-tertiary font-label-sm text-label-sm font-medium">
+              Área Lote: 420.00 m²
+            </span>
+          </div>
+        </div>
+
+        <!-- Global Scorecard Alert -->
+        <div id="sim-global-scorecard"></div>
+
+        <!-- Workspace: 2 Columnas (Inputs vs Semaforización) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <!-- LEFT: Inputs de la Propuesta (5 cols) -->
+          <div class="lg:col-span-5 bg-surface-container-lowest p-6 sm:p-8 rounded-3xl border border-surface-variant/40 shadow-sm flex flex-col gap-4">
+            <div class="flex items-center justify-between pb-2 border-b border-surface-variant/30">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-semibold">01 · Modelado Volumétrico</span>
+              <span class="text-tertiary font-label-sm text-label-sm">Entrada del Usuario</span>
+            </div>
+
+            <!-- Uso Proyectado -->
+            <div class="flex flex-col gap-1">
+              <label class="font-label-sm text-[11px] uppercase tracking-wider text-tertiary font-semibold">Uso Proyectado Principal</label>
+              <select id="select-uso" class="w-full px-3 py-2.5 rounded-xl bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-1 focus:ring-primary border border-surface-variant/30">
+                <option value="mixto">Edificio Mixto: Comercio P1 + Vivienda Superior</option>
+                <option value="residencial">Residencial Multifamiliar Puro</option>
+                <option value="servicios">Servicios Empresariales & Oficinas</option>
+              </select>
+            </div>
+
+            <!-- Inputs Numéricos -->
+            <div class="grid grid-cols-2 gap-3 pt-1">
+              <div class="flex flex-col gap-1 p-3 rounded-xl bg-surface-container-low border border-surface-variant/20">
+                <label class="font-label-sm text-[10px] uppercase text-tertiary font-semibold" for="inp-ocupacion">Área Ocupación P1 (m²)</label>
+                <input id="inp-ocupacion" type="number" step="1" value="280.00" class="w-full bg-transparent font-headline-sm text-[18px] font-bold text-on-surface focus:outline-none border-b border-outline-variant/40 focus:border-primary pb-0.5"/>
+                <span class="text-[10px] text-tertiary">Tope: 70%</span>
+              </div>
+              <div class="flex flex-col gap-1 p-3 rounded-xl bg-surface-container-low border border-surface-variant/20">
+                <label class="font-label-sm text-[10px] uppercase text-tertiary font-semibold" for="inp-pisos">Número de Pisos</label>
+                <input id="inp-pisos" type="number" min="1" max="15" value="5" class="w-full bg-transparent font-headline-sm text-[18px] font-bold text-on-surface focus:outline-none border-b border-outline-variant/40 focus:border-primary pb-0.5"/>
+                <span class="text-[10px] text-tertiary">Niveles sobre rasante</span>
+              </div>
+              <div class="flex flex-col gap-1 p-3 rounded-xl bg-surface-container-low border border-surface-variant/20">
+                <label class="font-label-sm text-[10px] uppercase text-tertiary font-semibold" for="inp-altura">Altura Total (m)</label>
+                <input id="inp-altura" type="number" step="0.1" value="15.80" class="w-full bg-transparent font-headline-sm text-[18px] font-bold text-on-surface focus:outline-none border-b border-outline-variant/40 focus:border-primary pb-0.5"/>
+                <span class="text-[10px] text-tertiary">Gálibo hasta cumbrera</span>
+              </div>
+              <div class="flex flex-col gap-1 p-3 rounded-xl bg-surface-container-low border border-surface-variant/20">
+                <label class="font-label-sm text-[10px] uppercase text-tertiary font-semibold" for="inp-total-const">Total Construido (m²)</label>
+                <input id="inp-total-const" type="number" step="1" value="1120.00" class="w-full bg-transparent font-headline-sm text-[18px] font-bold text-on-surface focus:outline-none border-b border-outline-variant/40 focus:border-primary pb-0.5"/>
+                <span class="text-[10px] text-tertiary">Área bruta cubierta</span>
+              </div>
+              <div class="flex flex-col gap-1 p-3 rounded-xl bg-surface-container-low border border-surface-variant/20">
+                <label class="font-label-sm text-[10px] uppercase text-tertiary font-semibold" for="inp-aisl-post">Aislamiento Post. (m)</label>
+                <input id="inp-aisl-post" type="number" step="0.1" value="3.20" class="w-full bg-transparent font-headline-sm text-[18px] font-bold text-on-surface focus:outline-none border-b border-outline-variant/40 focus:border-primary pb-0.5"/>
+                <span class="text-[10px] text-tertiary">Retiro a lindero fondo</span>
+              </div>
+              <div class="flex flex-col gap-1 p-3 rounded-xl bg-surface-container-low border border-surface-variant/20">
+                <label class="font-label-sm text-[10px] uppercase text-tertiary font-semibold" for="inp-antejardin">Antejardín Frontal (m)</label>
+                <input id="inp-antejardin" type="number" step="0.1" value="2.50" class="w-full bg-transparent font-headline-sm text-[18px] font-bold text-on-surface focus:outline-none border-b border-outline-variant/40 focus:border-primary pb-0.5"/>
+                <span class="text-[10px] text-tertiary">Retiro paramento vía</span>
+              </div>
+            </div>
+
+            <button data-switch-to="cesiones" class="mt-2 w-full py-2.5 px-4 rounded-full bg-primary text-on-primary font-label-md text-label-md uppercase font-semibold hover:bg-primary-container transition-all flex items-center justify-center gap-2 shadow-sm">
+              <span>Liquidar Cesiones de esta Propuesta</span>
+              <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </button>
+          </div>
+
+          <!-- RIGHT: Semaforización y Articulado POT (7 cols) -->
+          <div class="lg:col-span-7 bg-surface-container-lowest p-6 sm:p-8 rounded-3xl border border-surface-variant/40 shadow-sm flex flex-col gap-4">
+            <div class="flex items-center justify-between pb-2 border-b border-surface-variant/30">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">02 · Verificación Automática</span>
+              <span class="text-tertiary font-label-sm text-label-sm">POT Acuerdo 029/2016</span>
+            </div>
+
+            <!-- Semaforizaciones dinámicas -->
+            <div class="space-y-3">
+              <div id="chk-ocupacion"></div>
+              <div id="chk-altura"></div>
+              <div id="chk-construccion"></div>
+              <div id="chk-aislamiento"></div>
+            </div>
+
+            <!-- Disclaimer legal orientativo -->
+            <div class="p-3.5 rounded-2xl bg-surface-container-low text-tertiary text-[11px] leading-relaxed border border-surface-variant/30">
+              <strong>Nota Orientativa:</strong> Esta simulación se realiza conforme a las tablas paramétricas del Acuerdo Municipal 029 de 2016 de Sogamoso. No reemplaza el trámite de licencia formal ni concepto vinculante expedido por la Curaduría Urbana o Secretaría de Planeación.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         PESTAÑA 4: CALCULADORA DE CESIONES URBANÍSTICAS
+         ==================================================================== -->
+    <div id="tab-cesiones" class="tab-view-container hidden flex flex-col w-full px-4 lg:px-margin py-space-md">
+      <div class="max-w-[1320px] mx-auto flex flex-col gap-6 w-full">
+        
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface-container-low/70 p-4 rounded-2xl border border-surface-variant/40 shadow-sm">
+          <div>
+            <span class="font-label-sm text-[11px] uppercase tracking-wider text-secondary font-semibold">Módulo Técnico C-04</span>
+            <h1 class="font-headline-sm text-[20px] font-bold text-on-surface">Liquidación de Cesiones Obligatorias</h1>
+            <p class="font-body-sm text-[12px] text-tertiary">Cálculo de cesiones de espacio público y equipamiento según el Acuerdo 029 de 2016 de Sogamoso.</p>
+          </div>
+          <button id="btn-save-current-predio" class="px-4 py-2 rounded-full bg-secondary text-white font-label-sm text-label-sm hover:bg-secondary-container hover:text-on-secondary-container transition-all flex items-center gap-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">bookmark_add</span>
+            <span>Guardar en mi Historial</span>
+          </button>
+        </div>
+
+        <!-- Grid 2 Columnas -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <!-- LEFT: Parámetros del Proyecto (5 cols) -->
+          <div class="lg:col-span-5 bg-surface-container-lowest p-6 sm:p-8 rounded-3xl border border-surface-variant/40 shadow-sm flex flex-col gap-4">
+            <div class="flex items-center justify-between pb-2 border-b border-surface-variant/30">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">Escala y Densidad</span>
+              <span class="text-tertiary font-label-sm text-label-sm">Parámetros</span>
+            </div>
+
+            <div class="space-y-3">
+              <div class="flex flex-col gap-1 p-3 rounded-xl bg-surface-container-low">
+                <label class="font-label-sm text-[11px] uppercase text-tertiary font-semibold" for="ces-inp-viviendas">Unidades de Vivienda Proyectadas</label>
+                <input id="ces-inp-viviendas" type="number" min="1" value="10" class="w-full bg-transparent font-headline-sm text-[18px] font-bold text-on-surface focus:outline-none border-b border-outline-variant/40 focus:border-primary pb-0.5"/>
+                <span class="text-[10px] text-tertiary">Densidad calculada a 3.5 hab/viv</span>
+              </div>
+
+              <div class="flex flex-col gap-1 p-3 rounded-xl bg-surface-container-low">
+                <label class="font-label-sm text-[11px] uppercase text-tertiary font-semibold" for="ces-inp-locales">Locales Comerciales (Piso 1)</label>
+                <input id="ces-inp-locales" type="number" min="0" value="2" class="w-full bg-transparent font-headline-sm text-[18px] font-bold text-on-surface focus:outline-none border-b border-outline-variant/40 focus:border-primary pb-0.5"/>
+                <span class="text-[10px] text-tertiary">Comercio de proximidad</span>
+              </div>
+            </div>
+
+            <!-- Resumen de Habitantes Estimados -->
+            <div class="p-4 rounded-2xl bg-surface-container-high/60 flex items-center justify-between">
+              <span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Población Objetivo Estimada:</span>
+              <span id="ces-out-habitantes" class="font-headline-sm text-[18px] font-bold text-primary">35 Habitantes</span>
+            </div>
+          </div>
+
+          <!-- RIGHT: Liquidación y Fondo de Compensación (7 cols) -->
+          <div class="lg:col-span-7 bg-surface-container-lowest p-6 sm:p-8 rounded-3xl border border-surface-variant/40 shadow-sm flex flex-col gap-4">
+            <div class="flex items-center justify-between pb-2 border-b border-surface-variant/30">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-semibold">Liquidación de Áreas Obligatorias</span>
+              <span class="text-tertiary font-label-sm text-label-sm">Art. 215 y 128 POT</span>
+            </div>
+
+            <div class="space-y-3">
+              <!-- Espacio Público -->
+              <div class="p-4 rounded-2xl bg-surface-container-low flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[20px]">park</span>
+                  </div>
+                  <div>
+                    <h5 class="font-label-md text-label-md font-bold text-on-surface">Espacio Público Efectivo (Parques)</h5>
+                    <span class="text-[11px] text-tertiary">Regla POT: 4.0 m² por habitante</span>
+                  </div>
+                </div>
+                <span id="ces-out-espacio-publico" class="font-headline-sm text-[18px] font-bold text-primary">140.00 m²</span>
+              </div>
+
+              <!-- Equipamiento Comunal -->
+              <div class="p-4 rounded-2xl bg-surface-container-low flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-secondary/10 text-secondary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[20px]">apartment</span>
+                  </div>
+                  <div>
+                    <h5 class="font-label-md text-label-md font-bold text-on-surface">Equipamiento Comunal Público</h5>
+                    <span class="text-[11px] text-tertiary">Regla POT: 8% sobre área de lote</span>
+                  </div>
+                </div>
+                <span id="ces-out-equipamiento" class="font-headline-sm text-[18px] font-bold text-secondary">33.60 m²</span>
+              </div>
+
+              <!-- Total m2 Cesión -->
+              <div class="p-4 rounded-2xl bg-surface-container-highest flex items-center justify-between">
+                <span class="font-headline-sm text-[16px] font-bold text-on-surface">Total Cesión Obligatoria Exigida:</span>
+                <span id="ces-out-total-m2" class="font-headline-sm text-[20px] font-bold text-on-surface">173.60 m²</span>
+              </div>
+
+              <!-- Fondo de Compensación Monetaria -->
+              <div class="p-4 rounded-2xl bg-surface-container border border-primary/20 flex flex-col gap-1.5">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[18px]">account_balance</span>
+                    <span class="font-label-sm text-label-sm font-semibold uppercase text-primary">Fondo de Compensación Urbana (Art. 128)</span>
+                  </div>
+                  <span class="text-[11px] text-tertiary">Suelo Consolidado</span>
+                </div>
+                <p class="font-body-sm text-[11px] text-tertiary">
+                  En predios de consolidación donde no sea físicamente viable entregar suelo en sitio, se compensa monetariamente al municipio de Sogamoso:
+                </p>
+                <div class="pt-1 flex items-baseline justify-between border-t border-surface-variant/30">
+                  <span class="font-label-md text-label-md text-on-surface font-semibold">Valor Estimado de Compensación:</span>
+                  <span id="ces-out-valor-cop" class="font-headline-sm text-[18px] sm:text-[20px] font-bold text-primary">$ 78.120.000 COP</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         PESTAÑA 5: PLANOTECA OFICIAL POT 2016 (VISOR DE PLANOS PDF)
+         ==================================================================== -->
+    <div id="tab-planoteca" class="tab-view-container hidden flex flex-col w-full px-4 lg:px-margin py-space-md">
+      <div class="max-w-[1320px] mx-auto flex flex-col gap-6 w-full">
+        
+        <!-- Header Planoteca -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface-container-low/70 p-4 sm:p-6 rounded-2xl border border-surface-variant/40 shadow-sm">
+          <div class="flex items-center gap-3">
+            <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
+              <span class="material-symbols-outlined text-[24px]">map</span>
+            </span>
+            <div>
+              <h1 class="font-headline-sm text-[22px] font-bold text-on-surface">Planoteca Oficial — POT Sogamoso 2016</h1>
+              <p class="font-body-sm text-[12px] text-tertiary">Cartografía oficial aprobada en el Acuerdo Municipal 029 del 28 de diciembre de 2016.</p>
+            </div>
+          </div>
+          <a href="https://drive.google.com/drive/folders/0B0erYQEtPPx4ZUlSSEpxTjEtVnc" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm hover:bg-primary-container transition-all flex items-center gap-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">folder_open</span>
+            <span>Abrir Carpeta Google Drive Oficial</span>
+            <span class="material-symbols-outlined text-[14px]">north_east</span>
+          </a>
+        </div>
+
+        <!-- Categorías de Planos generadas dinámicamente -->
+        <div id="planoteca-categories-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========================================================================
+       MODAL: SISTEMA DE USUARIO & HISTORIAL DE PREDIOS GUARDADOS
+       ======================================================================== -->
+  <div id="modal-user-auth" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-surface-container-lowest max-w-lg w-full rounded-3xl p-6 sm:p-8 shadow-2xl border border-surface-variant/40 flex flex-col gap-4 relative animate-in fade-in duration-200">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-surface-variant/30">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[22px]">account_circle</span>
+          <h3 class="font-headline-sm text-[20px] font-bold text-on-surface">Mi Cuenta & Historial</h3>
+        </div>
+        <button id="btn-close-user-modal" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-tertiary transition-all">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <!-- Info Modo Invitado vs Firebase -->
+      <div class="p-3.5 rounded-2xl bg-surface-container-low flex items-center justify-between text-body-sm">
+        <div class="flex items-center gap-2.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+          <span class="font-semibold text-on-surface">Modo Libre Activo (Invitado)</span>
+        </div>
+        <span class="font-label-sm text-[11px] text-tertiary">Almacenamiento Local</span>
+      </div>
+
+      <!-- Predios Guardados -->
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">Mis Predios Evaluados</span>
+          <span class="text-[11px] text-tertiary">Historial Personal</span>
+        </div>
+        <div id="saved-predios-list" class="max-h-60 overflow-y-auto space-y-2 pr-1"></div>
+      </div>
+
+      <!-- Footer Modal -->
+      <div class="pt-3 border-t border-surface-variant/30 flex items-center justify-between">
+        <span class="text-[11px] text-tertiary">Tus evaluaciones se guardan en este dispositivo.</span>
+        <button onclick="document.getElementById('modal-user-auth').classList.add('hidden')" class="px-4 py-1.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm hover:bg-primary-container transition-all">
+          Listo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Script Principal de la Aplicación -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
