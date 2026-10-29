@@ -934,7 +934,8 @@ function initAuthModal() {
         showAuthFeedback("✓ Sesión iniciada con éxito.", "success");
         if (inputPass) inputPass.value = '';
       } catch (err) {
-        showAuthFeedback(`Error al ingresar: ${formatAuthError(err.code)}`, "error");
+        console.error("Firebase Login Error:", err);
+        showAuthFeedback(`Error al ingresar: ${formatAuthError(err.code, err.message)}`, "error");
       }
     });
   }
@@ -950,10 +951,11 @@ function initAuthModal() {
       }
       try {
         await createUserWithEmailAndPassword(auth, email, pass);
-        showAuthFeedback("✓ Cuenta creada con éxito en Firebase.", "success");
+        showAuthFeedback("✓ ¡Cuenta creada con éxito en Firebase!", "success");
         if (inputPass) inputPass.value = '';
       } catch (err) {
-        showAuthFeedback(`Error de registro: ${formatAuthError(err.code)}`, "error");
+        console.error("Firebase Register Error:", err);
+        showAuthFeedback(`Error de registro: ${formatAuthError(err.code, err.message)}`, "error");
       }
     });
   }
@@ -980,12 +982,13 @@ function initAuthModal() {
     });
   }
 
-  // Guardar Predio
-  if (saveCurrentBtn) {
-    saveCurrentBtn.addEventListener('click', () => {
+  // Guardar Predio (soporta todos los botones marcados)
+  const saveButtons = document.querySelectorAll('[data-action="save-predio"], #btn-save-current-predio');
+  saveButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
       saveCurrentEvaluation();
     });
-  }
+  });
 }
 
 function showAuthFeedback(msg, type) {
@@ -998,20 +1001,24 @@ function showAuthFeedback(msg, type) {
   box.textContent = msg;
 }
 
-function formatAuthError(code) {
+function formatAuthError(code, message) {
   switch (code) {
+    case 'auth/operation-not-allowed':
+      return "El proveedor de correo no estaba habilitado en Firebase. (¡Ya lo habilitaste en tu consola, intenta hacer clic en 'Crear Cuenta' de nuevo!).";
     case 'auth/user-not-found':
     case 'auth/wrong-password':
     case 'auth/invalid-credential':
       return "Credenciales incorrectas.";
     case 'auth/email-already-in-use':
-      return "El correo ya está registrado.";
+      return "Este correo ya está registrado en Firebase. Haz clic en 'Iniciar Sesión'.";
     case 'auth/weak-password':
       return "La contraseña debe tener al menos 6 caracteres.";
     case 'auth/invalid-email':
       return "Formato de correo no válido.";
+    case 'auth/network-request-failed':
+      return "Error de red o conexión.";
     default:
-      return "Verifica tus datos o conexión.";
+      return `${message || 'Verifica tus datos o conexión.'} (${code || 'error'})`;
   }
 }
 
