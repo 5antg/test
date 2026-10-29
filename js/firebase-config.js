@@ -20,7 +20,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyDQrzyLP6FFVh_hjFRIbgXIcG0-aM_Txi0",
+  apiKey: "AIzaSyDQrzyLP6FFVh_hJfRIbgXIcGO-aM_Txi0",
   authDomain: "sogamoso-pot-digital.firebaseapp.com",
   projectId: "sogamoso-pot-digital",
   storageBucket: "sogamoso-pot-digital.firebasestorage.app",
