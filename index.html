@@ -858,6 +858,20 @@
                 <span id="ces-out-total-m2" class="font-headline-sm text-[20px] font-bold text-on-surface">173.60 m²</span>
               </div>
 
+              <!-- Cupos de Parqueaderos -->
+              <div class="p-4 rounded-2xl bg-surface-container-low flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-emerald-600/10 text-emerald-700 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[20px]">directions_car</span>
+                  </div>
+                  <div>
+                    <h5 class="font-label-md text-label-md font-bold text-on-surface">Cupos de Parqueaderos Exigidos</h5>
+                    <span class="text-[11px] text-tertiary">Norma POT: 1 privado c/2 viv + 1 visitante c/5 viv</span>
+                  </div>
+                </div>
+                <span id="ces-out-parqueaderos" class="font-headline-sm text-[15px] sm:text-[16px] font-bold text-emerald-800">7 Cupos</span>
+              </div>
+
               <!-- Fondo de Compensación Monetaria -->
               <div class="p-4 rounded-2xl bg-surface-container border border-primary/20 flex flex-col gap-1.5">
                 <div class="flex items-center justify-between">
@@ -907,6 +921,52 @@
 
         <!-- Categorías de Planos generadas dinámicamente -->
         <div id="planoteca-categories-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         SECCIÓN IMPRIMIBLE: DOSSIER DE VIABILIDAD PRELIMINAR (PRINT VIEW)
+         ==================================================================== -->
+    <div id="dossier-print-section" class="hidden print:block w-full max-w-4xl mx-auto p-8 bg-white text-black font-body-md">
+      <!-- Encabezado Editorial -->
+      <div class="flex items-center justify-between pb-4 border-b-2 border-primary mb-6">
+        <div>
+          <h1 class="text-2xl font-bold font-headline-lg tracking-tight text-primary">SOGAMOSO POT DIGITAL</h1>
+          <p class="text-xs uppercase tracking-widest text-gray-500 font-semibold">Dossier de Evaluación Urbanística y Normativa Preliminar</p>
+          <p class="text-xs text-gray-600">Base Normativa: POT Sogamoso · Acuerdo Municipal 029 del 28 de diciembre de 2016</p>
+        </div>
+        <div class="text-right text-xs text-gray-500">
+          <p><strong>Fecha de Expedición:</strong> <span id="dossier-print-date"></span></p>
+          <p>Municipio de Sogamoso, Boyacá</p>
+        </div>
+      </div>
+
+      <!-- Datos del Predio -->
+      <div class="mb-6 p-4 rounded-xl bg-gray-50 border border-gray-200">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-primary mb-3">01 · Identificación y Localización del Predio</h2>
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <p><strong>Dirección:</strong> <span id="dossier-print-address"></span></p>
+          <p><strong>Cédula Catastral (30d):</strong> <span id="dossier-print-cedula" class="font-mono"></span></p>
+          <p><strong>Matrícula Inmobiliaria:</strong> <span id="dossier-print-matricula"></span></p>
+          <p><strong>Tratamiento Urbanístico:</strong> <span id="dossier-print-tratamiento"></span></p>
+          <p><strong>Zonificación:</strong> <span id="dossier-print-zonificacion"></span></p>
+          <p><strong>Dimensiones Lote:</strong> <span id="dossier-print-area"></span></p>
+        </div>
+      </div>
+
+      <!-- Resumen Volumétrico -->
+      <div class="mb-6 p-4 rounded-xl bg-gray-50 border border-gray-200">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-primary mb-3">02 · Propuesta Volumétrica y Cumplimiento POT</h2>
+        <p class="text-xs mb-3"><strong>Parámetros Evaluados:</strong> <span id="dossier-print-propuesta"></span></p>
+        <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs">
+          <strong>Dictamen Técnico:</strong> Los parámetros volumétricos preliminares han sido evaluados contra los índices máximos de ocupación (Art. 184), construcción (Art. 186), alturas (Art. 192) y aislamientos (Art. 198) del Acuerdo 029 de 2016 de Sogamoso.
+        </div>
+      </div>
+
+      <!-- Disclaimer Legal Explícito Obligatorio según PRD -->
+      <div class="p-4 rounded-xl bg-gray-100 border-l-4 border-amber-600 text-[11px] text-gray-700 leading-relaxed">
+        <strong class="text-gray-900 block mb-1">DECLARACIÓN DE EXCLUSIÓN Y DESCARGO DE RESPONSABILIDAD LEGAL (PRD):</strong>
+        Este informe técnico es generado con fines estrictamente orientativos, académicos y de diagnóstico temprano. No constituye licencia urbanística, no sustituye la consulta oficial ante la Secretaría de Planeación Municipal de Sogamoso ni la Curaduría Urbana, y carece de validez legal para el inicio de obras o ventas según lo dispuesto en la Ley 388 de 1997, el Decreto Nacional 1077 de 2015 y el Acuerdo Municipal 029 de 2016 de Sogamoso (Boyacá).
       </div>
     </div>
 

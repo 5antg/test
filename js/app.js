@@ -18,12 +18,11 @@ const state = {
   cesionesInputs: {
     unidadesVivienda: 10,
     localesComerciales: 2,
-    modalidadCompensacion: 'dinero'
+    modalidadCompensacion: 'dinero' // 'sitio' | 'dinero'
   },
   savedEvaluations: [],
   currentUser: null,
   leafletMap: null,
-  activePolygon: null,
   activeMarker: null,
   igacCatastroLayer: null,
   isIgacLayerActive: true
@@ -132,14 +131,14 @@ function syncAllViews(predio) {
   // 4. Calculadora de Cesiones
   updateCesionesView(predio);
 
-  // 5. Panel Flotante y delimitación en el Mapa
+  // 5. Panel Flotante y Pin en el Mapa
   updateExploradorHUD(predio);
-  delimitActivePredioOnMap(predio);
+  setPredioPinOnMap(predio);
   updateColombiaEnMapasLink(predio);
 }
 
 /* ==========================================================================
-   3. EXPLORADOR URBANO Y DELIMITACIÓN POLIGONAL DEL PREDIO (LEAFLET)
+   3. EXPLORADOR URBANO Y PIN ELEGANTE DE LOCALIZACIÓN (LEAFLET)
    ========================================================================== */
 function initLeafletMap() {
   const mapElement = document.getElementById('leaflet-map');
@@ -153,27 +152,25 @@ function initLeafletMap() {
     zoomControl: false
   });
 
-  // Capa base satelital / urbana (OpenStreetMap con detalles viales)
+  // Capa base satelital / urbana
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap | POT Sogamoso 2016 | IGAC Colombia en Mapas'
   }).addTo(state.leafletMap);
 
-  // Capa WMS Oficial de Catastro de Colombia en Mapas (IGAC)
+  // Capa WMS de Catastro IGAC
   try {
     state.igacCatastroLayer = L.tileLayer.wms('https://mapas.igac.gov.co/server/services/catastro/wms/MapServer/WMSServer', {
-      layers: '0,1,2', // Capas catastrales prediales
+      layers: '0,1,2',
       format: 'image/png',
       transparent: true,
       opacity: 0.65,
       attribution: 'Límites Prediales: IGAC / Colombia en Mapas',
       maxZoom: 20
     });
-    
-    // Añadida por defecto
     state.igacCatastroLayer.addTo(state.leafletMap);
   } catch (err) {
-    console.warn("Servicio WMS de IGAC no disponible temporalmente, usando visualizador vectorial.", err);
+    console.warn("Servicio WMS de IGAC temporalmente no disponible.", err);
   }
 
   // Toggle de la capa IGAC en el DOM
@@ -191,20 +188,20 @@ function initLeafletMap() {
     });
   }
 
-  // Clic en el mapa para capturar coordenadas y delimitar predio nuevo
+  // Clic en el mapa para capturar predio
   state.leafletMap.on('click', (e) => {
     const { lat, lng } = e.latlng;
     createCustomPredioFromCoords(lat, lng);
   });
 
-  // Botones de zoom
+  // Controles de zoom
   document.getElementById('btn-map-zoom-in')?.addEventListener('click', () => state.leafletMap.zoomIn());
   document.getElementById('btn-map-zoom-out')?.addEventListener('click', () => state.leafletMap.zoomOut());
   document.getElementById('btn-map-recenter')?.addEventListener('click', () => {
     state.leafletMap.setView([state.currentPredio.coordenadas.lat, state.currentPredio.coordenadas.lng], 18);
   });
 
-  // Alternar vista CAD SVG
+  // Alternador con plano CAD SVG
   const toggleMapBtn = document.getElementById('btn-toggle-map-mode');
   if (toggleMapBtn) {
     toggleMapBtn.addEventListener('click', () => {
@@ -229,17 +226,12 @@ function initLeafletMap() {
 }
 
 /**
- * MARCADOR / PIN DEL PREDIO ACTIVO:
- * Ubica un pin limpio y elegante sobre el predio seleccionado sin recuadros geométricos.
+ * MARCADOR / PIN DEL PREDIO ACTIVO
  */
-function delimitActivePredioOnMap(predio) {
+function setPredioPinOnMap(predio) {
   if (!state.leafletMap || typeof L === 'undefined') return;
 
-  // Limpiar polígonos y pines previos para mantener el mapa 100% limpio
-  if (state.activePolygon) {
-    state.leafletMap.removeLayer(state.activePolygon);
-    state.activePolygon = null;
-  }
+  // Limpiar marcador anterior
   if (state.activeMarker) {
     state.leafletMap.removeLayer(state.activeMarker);
     state.activeMarker = null;
@@ -247,7 +239,7 @@ function delimitActivePredioOnMap(predio) {
 
   const { lat, lng } = predio.coordenadas;
 
-  // Icono de Pin arquitectónico elegante en la paleta Atelier Lilac
+  // Icono arquitectónico Atelier Lilac
   const pinHtml = `
     <div style="position: relative; display: flex; flex-direction: column; align-items: center; cursor: pointer;">
       <div style="background: #655090; color: #ffffff; width: 34px; height: 34px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(101,80,144,0.45); border: 2.5px solid #ffffff;">
@@ -265,13 +257,11 @@ function delimitActivePredioOnMap(predio) {
     popupAnchor: [0, -38]
   });
 
-  // Crear único marcador en el mapa
   state.activeMarker = L.marker([lat, lng], {
     icon: customPinIcon,
     title: predio.direccion
   }).addTo(state.leafletMap);
 
-  // Popup con detalles clave
   state.activeMarker.bindPopup(`
     <div style="font-family: 'Plus Jakarta Sans', sans-serif; padding: 4px; min-width: 180px;">
       <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
@@ -289,7 +279,6 @@ function delimitActivePredioOnMap(predio) {
     </div>
   `);
 
-  // Centrar suavemente en el predio seleccionado
   state.leafletMap.flyTo([lat, lng], 17, {
     duration: 0.8
   });
@@ -297,11 +286,9 @@ function delimitActivePredioOnMap(predio) {
 
 /**
  * DECODIFICADOR OFICIAL DE CÉDULA CATASTRAL (30 DÍGITOS)
- * Estructura IGAC para Sogamoso:
- * 15 (Dpto Boyacá) + 759 (Mun Sogamoso) + 1 (Urbano) + 01 (Sector) + 02 (Comuna) + 0034 (Mz) + 0012 (Predio)...
  */
 export function decodeCadastralCode(code) {
-  const clean = code.replace(/\D/g, ''); // Solo números
+  const clean = code.replace(/\D/g, '');
   if (clean.length < 15) {
     return {
       valido: false,
@@ -341,13 +328,11 @@ function updateColombiaEnMapasLink(predio) {
   const lat = predio.coordenadas.lat;
   const lng = predio.coordenadas.lng;
   
-  // URL directa al geoportal de Colombia en Mapas centrada en las coordenadas de Sogamoso
   const url = `https://www.colombiaenmapas.gov.co/?e=${(lng - 0.005).toFixed(4)},${(lat - 0.005).toFixed(4)},${(lng + 0.005).toFixed(4)},${(lat + 0.005).toFixed(4)},4326&b=igac&u=0&t=catastro`;
   btnIgac.href = url;
 }
 
 function createCustomPredioFromCoords(lat, lng) {
-  // Generar código catastral oficial con estructura IGAC (30 dígitos)
   const mzRandom = String(Math.floor(10 + Math.random() * 80)).padStart(4, '0');
   const loteRandom = String(Math.floor(1 + Math.random() * 40)).padStart(4, '0');
   const cedulaIGAC = `15759010102${mzRandom}${loteRandom}0000000000`;
@@ -386,11 +371,13 @@ function createCustomPredioFromCoords(lat, lng) {
       aislamientoLateralMin: 0.00,
       antejardinMin: 2.50,
       voladizoMax: 0.80,
+      parqueaderosRatio: "1 cupo cada 2 viviendas + 1 visitante cada 5",
       articulos: {
         ocupacion: "Art. 184 Acuerdo 029/2016",
         construccion: "Art. 186 Acuerdo 029/2016",
         altura: "Art. 192 Acuerdo 029/2016",
         aislamiento: "Art. 198 Acuerdo 029/2016",
+        antejardin: "Art. 204 Acuerdo 029/2016",
         cesiones: "Art. 215 Acuerdo 029/2016"
       }
     },
@@ -417,7 +404,6 @@ function updateExploradorHUD(predio) {
   const elMzLote = document.getElementById('hud-manzana-lote');
   if (elMzLote) elMzLote.textContent = `${predio.manzana} · ${predio.lote}`;
 
-  // Desglose decodificado de la cédula IGAC
   const decoded = decodeCadastralCode(predio.codigoCatastral);
   const elDecoded = document.getElementById('hud-cedula-decoded-info');
   if (elDecoded) {
@@ -430,7 +416,6 @@ function updateExploradorHUD(predio) {
     }
   }
 
-  // Tarjeta flotante de diagnóstico
   const elDiagAddress = document.getElementById('diag-card-address');
   if (elDiagAddress) elDiagAddress.textContent = predio.direccion;
 
@@ -470,7 +455,6 @@ function initSearch() {
     const query = searchInput.value.trim().toLowerCase();
     if (!query) return;
 
-    // Buscar en los predios predeterminados
     const found = state.allPredios.find(p => 
       p.direccion.toLowerCase().includes(query) ||
       p.codigoCatastral.includes(query) ||
@@ -480,7 +464,6 @@ function initSearch() {
     if (found) {
       setPredioActivo(found);
     } else {
-      // Si el usuario ingresó una cédula catastral de 30 dígitos
       const cleanDigits = query.replace(/\D/g, '');
       if (cleanDigits.length >= 15) {
         const decoded = decodeCadastralCode(cleanDigits);
@@ -581,7 +564,7 @@ function renderUsosList(containerId, list) {
 }
 
 /* ==========================================================================
-   5. SIMULADOR Y MOTOR DE CUMPLIMIENTO EN TIEMPO REAL
+   5. SIMULADOR Y MOTOR DE CUMPLIMIENTO CON RECOMENDACIONES TÉCNICAS
    ========================================================================== */
 function initSimulationEngine() {
   const inputs = [
@@ -642,10 +625,17 @@ function evaluateCompliance() {
   const prop = state.proposals;
   const norma = predio.norma;
 
+  const recommendations = [];
+
   // 1. Ocupación P1 (IO)
   const maxOcupacion = predio.areaTerreno * norma.indiceOcupacionMax;
   const ioCalculado = prop.ocupacionP1 / predio.areaTerreno;
   const cumpleOcupacion = prop.ocupacionP1 <= maxOcupacion;
+
+  if (!cumpleOcupacion) {
+    const exceso = (prop.ocupacionP1 - maxOcupacion).toFixed(1);
+    recommendations.push(`Reduce la huella de primer piso en al menos <strong>${exceso} m²</strong> para cumplir el IO máximo del ${(norma.indiceOcupacionMax * 100).toFixed(0)}% (${norma.articulos.ocupacion}).`);
+  }
 
   updateTrafficLight('chk-ocupacion', {
     cumple: cumpleOcupacion,
@@ -659,6 +649,12 @@ function evaluateCompliance() {
   const cumpleAltura = prop.altura <= norma.alturaMaximaMetros;
   const cumpleVolumetria = cumplePisos && cumpleAltura;
 
+  if (!cumplePisos) {
+    recommendations.push(`El proyecto excede el número de pisos permitidos (propuesto: ${prop.pisos}, límite: ${norma.pisosMaximos} pisos). Ajusta a la altura del sector (${norma.articulos.altura}).`);
+  } else if (!cumpleAltura) {
+    recommendations.push(`La altura en metros (${prop.altura.toFixed(1)} m) supera el gálibo máximo permitido de ${norma.alturaMaximaMetros.toFixed(1)} m (${norma.articulos.altura}).`);
+  }
+
   updateTrafficLight('chk-altura', {
     cumple: cumpleVolumetria,
     valorPropuesto: `${prop.pisos} Pisos (${prop.altura.toFixed(2)} m)`,
@@ -671,6 +667,11 @@ function evaluateCompliance() {
   const icCalculado = prop.totalConstruido / predio.areaTerreno;
   const cumpleConstruccion = prop.totalConstruido <= maxConstruido;
 
+  if (!cumpleConstruccion) {
+    const excesoConst = (prop.totalConstruido - maxConstruido).toFixed(1);
+    recommendations.push(`Área construida total excede en <strong>${excesoConst} m²</strong> el índice de construcción permitido (${norma.indiceConstruccionMax.toFixed(2)}x según ${norma.articulos.construccion}).`);
+  }
+
   updateTrafficLight('chk-construccion', {
     cumple: cumpleConstruccion,
     valorPropuesto: `${prop.totalConstruido.toFixed(2)} m² (IC: ${icCalculado.toFixed(2)})`,
@@ -681,6 +682,11 @@ function evaluateCompliance() {
   // 4. Aislamiento Posterior
   const cumpleAislamiento = prop.aislamientoPosterior >= norma.aislamientoPosteriorMin;
 
+  if (!cumpleAislamiento) {
+    const falta = (norma.aislamientoPosteriorMin - prop.aislamientoPosterior).toFixed(1);
+    recommendations.push(`Amplía el aislamiento posterior en <strong>${falta} m</strong> hacia el lindero de fondo para alcanzar el retiro reglamentario de ${norma.aislamientoPosteriorMin.toFixed(1)} m (${norma.articulos.aislamiento}).`);
+  }
+
   updateTrafficLight('chk-aislamiento', {
     cumple: cumpleAislamiento,
     valorPropuesto: `${prop.aislamientoPosterior.toFixed(2)} m`,
@@ -688,34 +694,42 @@ function evaluateCompliance() {
     articulo: norma.articulos.aislamiento
   });
 
-  // Scorecard General
+  // Scorecard General y Recomendaciones
   const scoreCard = document.getElementById('sim-global-scorecard');
   const allCumple = cumpleOcupacion && cumpleVolumetria && cumpleConstruccion && cumpleAislamiento;
 
   if (scoreCard) {
     if (allCumple) {
-      scoreCard.className = "p-space-md rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between";
+      scoreCard.className = "p-space-md rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex flex-col gap-2";
       scoreCard.innerHTML = `
-        <div class="flex items-center gap-3">
-          <span class="material-symbols-outlined text-emerald-600 text-[28px]">check_circle</span>
-          <div>
-            <h4 class="font-headline-sm text-headline-sm font-semibold text-emerald-950">Propuesta Viable y Cumplimiento Normativo 100%</h4>
-            <p class="font-body-sm text-body-sm text-emerald-800">Cumple con las directrices volumétricas y urbanísticas del Acuerdo 029 de 2016.</p>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-emerald-600 text-[28px]">check_circle</span>
+            <div>
+              <h4 class="font-headline-sm text-headline-sm font-semibold text-emerald-950">Propuesta Viable · Cumplimiento Normativo 100%</h4>
+              <p class="font-body-sm text-body-sm text-emerald-800">Cumple con las directrices volumétricas del Acuerdo 029 de 2016 para ${predio.barrio}.</p>
+            </div>
           </div>
+          <span class="px-3 py-1 bg-emerald-600 text-white rounded-full font-label-sm text-label-sm uppercase font-semibold">Aprobado</span>
         </div>
-        <span class="px-3 py-1 bg-emerald-600 text-white rounded-full font-label-sm text-label-sm uppercase font-semibold">Aprobado</span>
       `;
     } else {
-      scoreCard.className = "p-space-md rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-between";
+      let recsHtml = recommendations.map(r => `<li class="text-[12px] text-amber-900 list-disc ml-4">${r}</li>`).join('');
+      scoreCard.className = "p-space-md rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex flex-col gap-2.5";
       scoreCard.innerHTML = `
-        <div class="flex items-center gap-3">
-          <span class="material-symbols-outlined text-amber-600 text-[28px]">warning</span>
-          <div>
-            <h4 class="font-headline-sm text-headline-sm font-semibold text-amber-950">Observaciones Normativas Pendientes</h4>
-            <p class="font-body-sm text-body-sm text-amber-800">Uno o más parámetros superan los límites permitidos por el POT de Sogamoso. Ajusta los valores en rojo.</p>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-amber-600 text-[28px]">warning</span>
+            <div>
+              <h4 class="font-headline-sm text-headline-sm font-semibold text-amber-950">Observaciones Normativas Pendientes</h4>
+              <p class="font-body-sm text-body-sm text-amber-800">Revisa las siguientes pautas técnicas para que tu propuesta cumpla con el POT:</p>
+            </div>
           </div>
+          <span class="px-3 py-1 bg-amber-600 text-white rounded-full font-label-sm text-label-sm uppercase font-semibold">Requiere Ajuste</span>
         </div>
-        <span class="px-3 py-1 bg-amber-600 text-white rounded-full font-label-sm text-label-sm uppercase font-semibold">Requiere Ajuste</span>
+        <ul class="space-y-1 pt-1 border-t border-amber-200/60">
+          ${recsHtml}
+        </ul>
       `;
     }
   }
@@ -774,6 +788,11 @@ function updateCesionesView(predio) {
   const totalM2Cesion = m2EspacioPublico + m2Equipamiento;
   const valorTotalCompensacionCOP = totalM2Cesion * FORMULAS_CESIONES.valorMetroCuadradoSueloRefCOP;
 
+  // Parqueaderos reglamentarios
+  const parqueosVivienda = Math.ceil(viv / 2);
+  const parqueosVisitantes = Math.ceil(viv / 5);
+  const parqueosTotal = parqueosVivienda + parqueosVisitantes;
+
   const elViv = document.getElementById('ces-inp-viviendas');
   if (elViv && elViv.value != viv) elViv.value = viv;
 
@@ -792,6 +811,11 @@ function updateCesionesView(predio) {
   const elCompensacion = document.getElementById('ces-out-valor-cop');
   if (elCompensacion) {
     elCompensacion.textContent = `$ ${valorTotalCompensacionCOP.toLocaleString('es-CO')} COP`;
+  }
+
+  const elParqueos = document.getElementById('ces-out-parqueaderos');
+  if (elParqueos) {
+    elParqueos.textContent = `${parqueosTotal} Cupos (${parqueosVivienda} privados + ${parqueosVisitantes} visitantes)`;
   }
 }
 
@@ -818,7 +842,7 @@ function initPlanoteca() {
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <a href="${plano.urlDescarga}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm hover:bg-primary-container transition-all">
+          <a href="${plano.urlDescarga}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm hover:bg-primary-container transition-all shadow-sm">
             <span class="material-symbols-outlined text-[16px]">visibility</span>
             <span>Ver en Drive</span>
           </a>
@@ -845,7 +869,7 @@ function initPlanoteca() {
 }
 
 /* ==========================================================================
-   8. SISTEMA DE USUARIOS & HISTORIAL PERSONAL
+   8. SISTEMA DE USUARIOS & HISTORIAL PERSONAL (ALMACENAMIENTO LOCAL)
    ========================================================================== */
 function initAuthModal() {
   const openBtn = document.getElementById('btn-open-user-modal');
@@ -938,14 +962,50 @@ window.restoreEvaluation = (evalId) => {
 };
 
 /* ==========================================================================
-   9. GENERADOR DE REPORTE / DOSSIER PDF
+   9. GENERADOR DE REPORTE / DOSSIER PDF CON DISCLAIMER LEGAL OFICIAL
    ========================================================================== */
 function initPdfExport() {
   const exportButtons = document.querySelectorAll('[data-export-dossier-pdf]');
   exportButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      window.print();
+      generateAndPrintDossier();
     });
   });
+}
+
+function generateAndPrintDossier() {
+  const predio = state.currentPredio;
+  const prop = state.proposals;
+  const norma = predio.norma;
+
+  // Llenar datos en el contenedor del dossier imprimible
+  const elDate = document.getElementById('dossier-print-date');
+  if (elDate) elDate.textContent = new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const elDir = document.getElementById('dossier-print-address');
+  if (elDir) elDir.textContent = `${predio.direccion} · ${predio.barrio}`;
+
+  const elCat = document.getElementById('dossier-print-cedula');
+  if (elCat) elCat.textContent = predio.codigoCatastral;
+
+  const elMat = document.getElementById('dossier-print-matricula');
+  if (elMat) elMat.textContent = predio.matricula;
+
+  const elTrat = document.getElementById('dossier-print-tratamiento');
+  if (elTrat) elTrat.textContent = predio.tratamiento;
+
+  const elZonif = document.getElementById('dossier-print-zonificacion');
+  if (elZonif) elZonif.textContent = predio.zonificacion;
+
+  const elArea = document.getElementById('dossier-print-area');
+  if (elArea) elArea.textContent = `${predio.areaTerreno.toFixed(2)} m² (Frente: ${predio.frente}m, Fondo: ${predio.fondo}m)`;
+
+  const elProp = document.getElementById('dossier-print-propuesta');
+  if (elProp) {
+    elProp.textContent = `${prop.pisos} Pisos (${prop.altura} m) · Ocupación P1: ${prop.ocupacionP1} m² · Área Total Construida: ${prop.totalConstruido} m² · Retiro Post: ${prop.aislamientoPosterior} m`;
+  }
+
+  // Ejecutar impresión / Guardar como PDF del navegador
+  window.print();
 }
