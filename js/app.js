@@ -229,14 +229,13 @@ function initLeafletMap() {
 }
 
 /**
- * DELIMITACIÓN DEL PREDIO:
- * Dibuja el contorno perimetral exacto del predio seleccionado, con su geometría,
- * dimensiones de frente/fondo, y área en m².
+ * MARCADOR / PIN DEL PREDIO ACTIVO:
+ * Ubica un pin limpio y elegante sobre el predio seleccionado sin recuadros geométricos.
  */
 function delimitActivePredioOnMap(predio) {
   if (!state.leafletMap || typeof L === 'undefined') return;
 
-  // Limpiar delimitación y marcador previos para que el mapa quede limpio
+  // Limpiar polígonos y pines previos para mantener el mapa 100% limpio
   if (state.activePolygon) {
     state.leafletMap.removeLayer(state.activePolygon);
     state.activePolygon = null;
@@ -247,48 +246,42 @@ function delimitActivePredioOnMap(predio) {
   }
 
   const { lat, lng } = predio.coordenadas;
-  const frente = predio.frente;
-  const fondo = predio.fondo;
 
-  // Calcular las esquinas geométricas del lote (grados aprox en lat/lng)
-  // 1 grado latitud ≈ 111,111 metros
-  // 1 grado longitud ≈ 111,111 * cos(lat) ≈ 110,600 metros en Sogamoso
-  const deltaLat = (fondo / 111111) / 2;
-  const deltaLng = (frente / 110600) / 2;
+  // Icono de Pin arquitectónico elegante en la paleta Atelier Lilac
+  const pinHtml = `
+    <div style="position: relative; display: flex; flex-direction: column; align-items: center; cursor: pointer;">
+      <div style="background: #655090; color: #ffffff; width: 34px; height: 34px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(101,80,144,0.45); border: 2.5px solid #ffffff;">
+        <span class="material-symbols-outlined" style="transform: rotate(45deg); font-size: 20px; color: #ffffff;">location_on</span>
+      </div>
+      <div style="width: 10px; height: 3px; background: rgba(31,24,42,0.35); border-radius: 50%; margin-top: 2px;"></div>
+    </div>
+  `;
 
-  const latMin = lat - deltaLat;
-  const latMax = lat + deltaLat;
-  const lngMin = lng - deltaLng;
-  const lngMax = lng + deltaLng;
+  const customPinIcon = L.divIcon({
+    html: pinHtml,
+    className: 'custom-predio-pin',
+    iconSize: [34, 42],
+    iconAnchor: [17, 39],
+    popupAnchor: [0, -38]
+  });
 
-  const polygonCoords = [
-    [latMin, lngMin],
-    [latMax, lngMin],
-    [latMax, lngMax],
-    [latMin, lngMax]
-  ];
-
-  // Crear el polígono arquitectónico delimitado con estilo Atelier Lilac
-  state.activePolygon = L.polygon(polygonCoords, {
-    color: '#655090',           // Borde morado editorial
-    weight: 2.5,
-    opacity: 0.95,
-    fillColor: '#7e69ab',       // Relleno traslúcido
-    fillOpacity: 0.28,
-    dashArray: null
+  // Crear único marcador en el mapa
+  state.activeMarker = L.marker([lat, lng], {
+    icon: customPinIcon,
+    title: predio.direccion
   }).addTo(state.leafletMap);
 
-  // Popup enriquecido sobre el polígono
-  state.activePolygon.bindPopup(`
-    <div style="font-family: 'Plus Jakarta Sans', sans-serif; padding: 6px; min-width: 190px;">
+  // Popup con detalles clave
+  state.activeMarker.bindPopup(`
+    <div style="font-family: 'Plus Jakarta Sans', sans-serif; padding: 4px; min-width: 180px;">
       <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
         <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#655090;"></span>
         <strong style="color: #655090; font-size: 13px;">${predio.direccion}</strong>
       </div>
       <div style="font-size: 11px; color: #5c5b64; line-height: 1.4;">
         <strong>Área:</strong> ${predio.areaTerreno.toFixed(2)} m²<br>
-        <strong>Geometría:</strong> ${frente.toFixed(1)}m frente × ${fondo.toFixed(1)}m fondo<br>
-        <strong>Tratamiento:</strong> ${predio.tratamiento}
+        <strong>Tratamiento:</strong> ${predio.tratamiento}<br>
+        <strong>Zonificación:</strong> ${predio.zonificacion}
       </div>
       <div style="margin-top:6px; padding-top:6px; border-top:1px solid #eadef6; font-size:10px; color:#1f182a; font-weight:600;">
         POT Sogamoso · Ac. 029/2016
@@ -296,19 +289,9 @@ function delimitActivePredioOnMap(predio) {
     </div>
   `);
 
-  // Marcador sutil en el centroide del predio
-  state.activeMarker = L.circleMarker([lat, lng], {
-    radius: 4,
-    color: '#ffffff',
-    fillColor: '#655090',
-    weight: 2,
-    opacity: 1,
-    fillOpacity: 1
-  }).addTo(state.leafletMap);
-
-  // Centrar suavemente en el predio delimitado con zoom cercano
-  state.leafletMap.flyTo([lat, lng], 18, {
-    duration: 1.0
+  // Centrar suavemente en el predio seleccionado
+  state.leafletMap.flyTo([lat, lng], 17, {
+    duration: 0.8
   });
 }
 
