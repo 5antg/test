@@ -1,4 +1,17 @@
 import { PREDIOS_PRESET, CATALOGO_PLANOS_POT, FORMULAS_CESIONES } from './data/pot-sogamoso.js';
+import { 
+  auth, 
+  db, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged,
+  collection, 
+  addDoc, 
+  getDocs, 
+  query, 
+  where 
+} from './firebase-config.js';
 
 // Estado Global Reactivo de la Aplicación
 const state = {
@@ -869,7 +882,7 @@ function initPlanoteca() {
 }
 
 /* ==========================================================================
-   8. SISTEMA DE USUARIOS & HISTORIAL PERSONAL (ALMACENAMIENTO LOCAL)
+   8. SISTEMA DE USUARIOS & HISTORIAL CONECTADO A FIREBASE CLOUD FIRESTORE
    ========================================================================== */
 function initAuthModal() {
   const openBtn = document.getElementById('btn-open-user-modal');
@@ -877,6 +890,83 @@ function initAuthModal() {
   const closeBtn = document.getElementById('btn-close-user-modal');
   const saveCurrentBtn = document.getElementById('btn-save-current-predio');
 
+  const btnLogin = document.getElementById('btn-firebase-login');
+  const btnRegister = document.getElementById('btn-firebase-register');
+  const btnLogout = document.getElementById('btn-firebase-logout');
+  const inputEmail = document.getElementById('auth-input-email');
+  const inputPass = document.getElementById('auth-input-password');
+  const feedbackMsg = document.getElementById('auth-feedback-msg');
+
+  // Escuchar estado de autenticación de Firebase en tiempo real
+  onAuthStateChanged(auth, async (user) => {
+    state.currentUser = user;
+    const statusText = document.getElementById('auth-status-text');
+    const badgeSource = document.getElementById('auth-badge-source');
+    const formContainer = document.getElementById('auth-form-container');
+    const logoutContainer = document.getElementById('auth-logout-container');
+
+    if (user) {
+      if (statusText) statusText.textContent = `Conectado: ${user.email}`;
+      if (badgeSource) badgeSource.textContent = "Cloud Firestore Activo";
+      if (formContainer) formContainer.classList.add('hidden');
+      if (logoutContainer) logoutContainer.classList.remove('hidden');
+    } else {
+      if (statusText) statusText.textContent = "Modo Libre (Invitado)";
+      if (badgeSource) badgeSource.textContent = "Almacenamiento Local";
+      if (formContainer) formContainer.classList.remove('hidden');
+      if (logoutContainer) logoutContainer.classList.add('hidden');
+    }
+
+    renderSavedEvaluationsList();
+  });
+
+  // Iniciar Sesión con Firebase
+  if (btnLogin) {
+    btnLogin.addEventListener('click', async () => {
+      const email = inputEmail?.value.trim();
+      const pass = inputPass?.value;
+      if (!email || !pass) {
+        showAuthFeedback("Ingresa tu correo y contraseña.", "error");
+        return;
+      }
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        showAuthFeedback("✓ Sesión iniciada con éxito.", "success");
+        if (inputPass) inputPass.value = '';
+      } catch (err) {
+        showAuthFeedback(`Error al ingresar: ${formatAuthError(err.code)}`, "error");
+      }
+    });
+  }
+
+  // Crear Cuenta en Firebase
+  if (btnRegister) {
+    btnRegister.addEventListener('click', async () => {
+      const email = inputEmail?.value.trim();
+      const pass = inputPass?.value;
+      if (!email || !pass) {
+        showAuthFeedback("Ingresa un correo y contraseña válida (mín. 6 caracteres).", "error");
+        return;
+      }
+      try {
+        await createUserWithEmailAndPassword(auth, email, pass);
+        showAuthFeedback("✓ Cuenta creada con éxito en Firebase.", "success");
+        if (inputPass) inputPass.value = '';
+      } catch (err) {
+        showAuthFeedback(`Error de registro: ${formatAuthError(err.code)}`, "error");
+      }
+    });
+  }
+
+  // Cerrar Sesión
+  if (btnLogout) {
+    btnLogout.addEventListener('click', async () => {
+      await signOut(auth);
+      showAuthFeedback("Sesión cerrada.", "info");
+    });
+  }
+
+  // Modal Open/Close
   if (openBtn && modal) {
     openBtn.addEventListener('click', () => {
       renderSavedEvaluationsList();
@@ -890,6 +980,7 @@ function initAuthModal() {
     });
   }
 
+  // Guardar Predio
   if (saveCurrentBtn) {
     saveCurrentBtn.addEventListener('click', () => {
       saveCurrentEvaluation();
@@ -897,7 +988,34 @@ function initAuthModal() {
   }
 }
 
-function saveCurrentEvaluation() {
+function showAuthFeedback(msg, type) {
+  const box = document.getElementById('auth-feedback-msg');
+  if (!box) return;
+  box.classList.remove('hidden', 'text-emerald-700', 'text-red-700', 'text-tertiary');
+  if (type === 'success') box.classList.add('text-emerald-700', 'font-semibold');
+  else if (type === 'error') box.classList.add('text-red-700', 'font-medium');
+  else box.classList.add('text-tertiary');
+  box.textContent = msg;
+}
+
+function formatAuthError(code) {
+  switch (code) {
+    case 'auth/user-not-found':
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential':
+      return "Credenciales incorrectas.";
+    case 'auth/email-already-in-use':
+      return "El correo ya está registrado.";
+    case 'auth/weak-password':
+      return "La contraseña debe tener al menos 6 caracteres.";
+    case 'auth/invalid-email':
+      return "Formato de correo no válido.";
+    default:
+      return "Verifica tus datos o conexión.";
+  }
+}
+
+async function saveCurrentEvaluation() {
   const evaluation = {
     id: `eval-${Date.now()}`,
     fecha: new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
@@ -906,11 +1024,29 @@ function saveCurrentEvaluation() {
     cesiones: { ...state.cesionesInputs }
   };
 
+  // Guardar siempre copia local
   state.savedEvaluations.unshift(evaluation);
   localStorage.setItem('sogamoso_saved_evaluations', JSON.stringify(state.savedEvaluations));
-  renderSavedEvaluationsList();
 
-  alert(`✓ Predio guardado con éxito en tu historial personal (${evaluation.predio.direccion}).`);
+  // Si el usuario está autenticado en Firebase, guardar en Cloud Firestore
+  if (state.currentUser) {
+    try {
+      await addDoc(collection(db, "evaluaciones_predios"), {
+        userId: state.currentUser.uid,
+        userEmail: state.currentUser.email,
+        creadoEn: new Date().toISOString(),
+        ...evaluation
+      });
+      alert(`✓ Predio guardado y sincronizado en tu cuenta de Firebase Cloud Firestore (${evaluation.predio.direccion}).`);
+    } catch (err) {
+      console.warn("No se pudo escribir en Firestore, guardado localmente.", err);
+      alert(`✓ Predio guardado localmente (${evaluation.predio.direccion}).`);
+    }
+  } else {
+    alert(`✓ Predio guardado con éxito en tu historial de este dispositivo (${evaluation.predio.direccion}). Inicia sesión si deseas guardarlo en la nube.`);
+  }
+
+  renderSavedEvaluationsList();
 }
 
 function loadSavedEvaluations() {
@@ -924,14 +1060,31 @@ function loadSavedEvaluations() {
   }
 }
 
-function renderSavedEvaluationsList() {
+async function renderSavedEvaluationsList() {
   const container = document.getElementById('saved-predios-list');
   if (!container) return;
+
+  // Si está autenticado, intentar consultar Firestore
+  if (state.currentUser) {
+    try {
+      const q = query(collection(db, "evaluaciones_predios"), where("userId", "==", state.currentUser.uid));
+      const snap = await getDocs(q);
+      const cloudEvaluations = [];
+      snap.forEach(doc => {
+        cloudEvaluations.push({ docId: doc.id, ...doc.data() });
+      });
+      if (cloudEvaluations.length > 0) {
+        state.savedEvaluations = cloudEvaluations;
+      }
+    } catch (err) {
+      console.warn("Consulta Firestore falló, usando historial local.", err);
+    }
+  }
 
   if (state.savedEvaluations.length === 0) {
     container.innerHTML = `
       <div class="p-4 rounded-xl bg-surface-container-low text-center text-tertiary font-body-sm">
-        No tienes evaluaciones guardadas aún. Haz clic en "Guardar Evaluación Actual" para conservarla.
+        No tienes evaluaciones guardadas aún. Haz clic en "Guardar en mi Historial" para conservarla.
       </div>
     `;
     return;
@@ -943,7 +1096,7 @@ function renderSavedEvaluationsList() {
         <strong class="font-headline-sm text-[15px] text-on-surface">${ev.predio.direccion}</strong>
         <span class="font-body-sm text-[12px] text-tertiary">${ev.predio.barrio} · ${ev.predio.areaTerreno} m² · Guardado: ${ev.fecha}</span>
       </div>
-      <button onclick="window.restoreEvaluation('${ev.id}')" class="px-3 py-1 rounded-full bg-primary text-on-primary font-label-sm text-label-sm hover:bg-primary-container transition-all">
+      <button onclick="window.restoreEvaluation('${ev.id}')" class="px-3 py-1 rounded-full bg-primary text-on-primary font-label-sm text-label-sm hover:bg-primary-container transition-all shadow-sm">
         Cargar
       </button>
     </div>
