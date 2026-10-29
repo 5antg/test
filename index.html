@@ -178,7 +178,7 @@
   <!-- ========================================================================
        CONTENIDO PRINCIPAL: 5 PESTAÑAS INTERACTIVAS
        ======================================================================== -->
-  <main class="w-full pt-20 flex-1">
+  <main class="w-full pt-20 pb-24 lg:pb-8 flex-1">
 
     <!-- ====================================================================
          PESTAÑA 1: EXPLORADOR URBANO (SIG & MAPA DE SOGAMOSO)
@@ -380,7 +380,7 @@
               </div>
 
               <!-- Map Viewport -->
-              <div class="w-full h-[580px] rounded-2xl relative overflow-hidden flex items-center justify-center">
+              <div class="w-full h-[380px] sm:h-[480px] lg:h-[580px] rounded-2xl relative overflow-hidden flex items-center justify-center">
                 
                 <!-- 1. Leaflet Interactive Map Container -->
                 <div id="leaflet-map-wrapper" class="w-full h-full relative">
@@ -406,8 +406,8 @@
                   </svg>
                 </div>
 
-                <!-- Floating Diagnosis HUD Card -->
-                <div class="absolute top-4 right-4 max-w-[320px] w-full bg-surface-container-lowest/95 backdrop-blur-xl rounded-2xl p-space-md shadow-xl flex flex-col gap-3 border border-surface-variant/40 z-20">
+                <!-- Floating Diagnosis HUD Card (Desktop: visible sobre el mapa) -->
+                <div class="hidden md:flex absolute top-4 right-4 max-w-[320px] w-full bg-surface-container-lowest/95 backdrop-blur-xl rounded-2xl p-space-md shadow-xl flex-col gap-3 border border-surface-variant/40 z-20">
                   <div class="flex items-center justify-between">
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-semibold tracking-wide uppercase">
                       <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
@@ -453,6 +453,57 @@
                   </div>
                   <button data-switch-to="ficha" class="mt-1 w-full inline-flex items-center justify-center gap-2 py-2 px-4 rounded-full bg-primary text-on-primary font-label-md text-label-md tracking-wider uppercase font-semibold hover:bg-primary-container transition-all shadow-sm">
                     <span>Ver Ficha Normativa</span>
+                    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Tarjeta de Diagnóstico Móvil (debajo del mapa en celulares para no tapar los toques) -->
+              <div class="md:hidden mt-4 w-full bg-surface-container-lowest rounded-2xl p-4 shadow-sm flex flex-col gap-3 border border-surface-variant/40">
+                <div class="flex items-center justify-between">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-[11px] font-semibold tracking-wide uppercase">
+                    <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                    DIAGNÓSTICO // VIABLE
+                  </span>
+                  <span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+                </div>
+                <div>
+                  <h4 id="diag-card-address-m" class="font-headline-sm text-[16px] text-on-surface font-semibold leading-tight">Calle 11 # 14-25</h4>
+                  <p id="diag-card-subtitle-m" class="font-body-sm text-[12px] text-tertiary">El Rosario · Manzana 034 · Lote 012</p>
+                </div>
+                <div class="grid grid-cols-3 gap-2 py-1.5 bg-surface-container-low rounded-xl p-2 text-center">
+                  <div class="flex flex-col">
+                    <span class="font-label-sm text-[9px] text-tertiary uppercase">Área Lote</span>
+                    <span id="diag-card-area-m" class="font-headline-sm text-[14px] text-primary font-bold">420 m²</span>
+                  </div>
+                  <div class="flex flex-col border-x border-surface-variant">
+                    <span class="font-label-sm text-[9px] text-tertiary uppercase">Frente</span>
+                    <span id="diag-card-frente-m" class="font-headline-sm text-[14px] text-on-surface font-semibold">14.00 m</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-label-sm text-[9px] text-tertiary uppercase">Fondo</span>
+                    <span id="diag-card-fondo-m" class="font-headline-sm text-[14px] text-on-surface font-semibold">30.00 m</span>
+                  </div>
+                </div>
+                <div class="flex flex-col gap-1 text-[12px]">
+                  <div class="flex items-center justify-between pb-1 border-b border-surface-variant/30">
+                    <span class="text-tertiary">Zonificación</span>
+                    <span id="diag-card-zonif-m" class="text-on-surface font-medium">CAM-2 (Mixto)</span>
+                  </div>
+                  <div class="flex items-center justify-between pb-1 border-b border-surface-variant/30">
+                    <span class="text-tertiary">Tratamiento</span>
+                    <span id="diag-card-tratamiento-m" class="text-on-surface font-medium">Consolidación (TU-2)</span>
+                  </div>
+                  <div class="flex items-center justify-between pb-1 border-b border-surface-variant/30">
+                    <span class="text-tertiary">Altura Máxima</span>
+                    <span id="diag-card-altura-m" class="text-primary font-semibold">5 Pisos (16.50 m)</span>
+                  </div>
+                </div>
+                <button data-switch-to="ficha" class="w-full inline-flex items-center justify-center gap-2 py-2 px-4 rounded-full bg-primary text-on-primary font-label-md text-label-md uppercase font-semibold hover:bg-primary-container transition-all shadow-sm">
+                  <span>Ver Ficha Normativa</span>
+                  <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </button>
+              </div>
                     <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
                   </button>
                 </div>
@@ -1051,6 +1102,32 @@
       </div>
     </div>
   </div>
+
+  <!-- ========================================================================
+       BARRA DE NAVEGACIÓN INFERIOR PARA DISPOSITIVOS MÓVILES (CELULARES)
+       ======================================================================== -->
+  <nav id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-xl border-t border-surface-variant/40 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-2 py-1.5 flex items-center justify-around">
+    <a href="#" data-path="explorador" class="flex flex-col items-center justify-center py-1 px-3 rounded-2xl text-primary font-bold bg-primary/10 transition-all">
+      <span class="material-symbols-outlined text-[20px]">explore</span>
+      <span class="font-label-sm text-[10px] tracking-tight">Explorador</span>
+    </a>
+    <a href="#" data-path="ficha" class="flex flex-col items-center justify-center py-1 px-3 rounded-2xl text-tertiary hover:text-primary transition-all font-medium">
+      <span class="material-symbols-outlined text-[20px]">description</span>
+      <span class="font-label-sm text-[10px] tracking-tight">Ficha</span>
+    </a>
+    <a href="#" data-path="simulador" class="flex flex-col items-center justify-center py-1 px-3 rounded-2xl text-tertiary hover:text-primary transition-all font-medium">
+      <span class="material-symbols-outlined text-[20px]">apartment</span>
+      <span class="font-label-sm text-[10px] tracking-tight">Simulador</span>
+    </a>
+    <a href="#" data-path="cesiones" class="flex flex-col items-center justify-center py-1 px-3 rounded-2xl text-tertiary hover:text-primary transition-all font-medium">
+      <span class="material-symbols-outlined text-[20px]">calculate</span>
+      <span class="font-label-sm text-[10px] tracking-tight">Cesiones</span>
+    </a>
+    <a href="#" data-path="planoteca" class="flex flex-col items-center justify-center py-1 px-3 rounded-2xl text-tertiary hover:text-primary transition-all font-medium">
+      <span class="material-symbols-outlined text-[20px]">map</span>
+      <span class="font-label-sm text-[10px] tracking-tight">Planos</span>
+    </a>
+  </nav>
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

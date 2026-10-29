@@ -58,15 +58,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ==========================================================================
-   1. NAVEGACIÓN ENTRE PESTAÑAS
+   1. NAVEGACIÓN ENTRE PESTAÑAS (DESKTOP & MOBILE)
    ========================================================================== */
 function initNavigation() {
-  const navLinks = document.querySelectorAll('nav[data-main-nav] a[data-path]');
+  const navLinks = document.querySelectorAll('a[data-path]');
   navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const targetPath = link.getAttribute('data-path');
       switchTab(targetPath);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
 
@@ -83,14 +84,28 @@ function initNavigation() {
 export function switchTab(tabId) {
   state.activeTab = tabId;
 
-  document.querySelectorAll('nav[data-main-nav] a[data-path]').forEach(link => {
+  // Actualizar tanto la barra de navegación superior (desktop) como la inferior (mobile)
+  document.querySelectorAll('a[data-path]').forEach(link => {
     const path = link.getAttribute('data-path');
-    if (path === tabId) {
-      link.className = "px-space-md py-2 transition-all duration-200 bg-surface-container-highest text-primary font-medium rounded-full shadow-sm";
-      link.setAttribute('aria-current', 'page');
+    const isDesktop = link.closest('nav[data-main-nav]');
+    
+    if (isDesktop) {
+      if (path === tabId) {
+        link.className = "px-space-md py-2 transition-all duration-200 bg-surface-container-highest text-primary font-medium rounded-full shadow-sm";
+        link.setAttribute('aria-current', 'page');
+      } else {
+        link.className = "px-space-md py-2 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200";
+        link.removeAttribute('aria-current');
+      }
     } else {
-      link.className = "px-space-md py-2 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200";
-      link.removeAttribute('aria-current');
+      // Barra de navegación inferior móvil
+      if (path === tabId) {
+        link.className = "flex flex-col items-center justify-center py-1 px-3 rounded-2xl text-primary font-bold bg-primary/10 transition-all";
+        link.setAttribute('aria-current', 'page');
+      } else {
+        link.className = "flex flex-col items-center justify-center py-1 px-3 rounded-2xl text-tertiary hover:text-primary transition-all font-medium";
+        link.removeAttribute('aria-current');
+      }
     }
   });
 
@@ -429,29 +444,45 @@ function updateExploradorHUD(predio) {
     }
   }
 
-  const elDiagAddress = document.getElementById('diag-card-address');
-  if (elDiagAddress) elDiagAddress.textContent = predio.direccion;
+  ['diag-card-address', 'diag-card-address-m'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = predio.direccion;
+  });
 
-  const elDiagSubtitle = document.getElementById('diag-card-subtitle');
-  if (elDiagSubtitle) elDiagSubtitle.textContent = `${predio.barrio} · ${predio.manzana} · ${predio.lote}`;
+  ['diag-card-subtitle', 'diag-card-subtitle-m'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = `${predio.barrio} · ${predio.manzana} · ${predio.lote}`;
+  });
 
-  const elDiagArea = document.getElementById('diag-card-area');
-  if (elDiagArea) elDiagArea.textContent = `${predio.areaTerreno.toFixed(0)} m²`;
+  ['diag-card-area', 'diag-card-area-m'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = `${predio.areaTerreno.toFixed(0)} m²`;
+  });
 
-  const elDiagFrente = document.getElementById('diag-card-frente');
-  if (elDiagFrente) elDiagFrente.textContent = `${predio.frente.toFixed(2)} m`;
+  ['diag-card-frente', 'diag-card-frente-m'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = `${predio.frente.toFixed(2)} m`;
+  });
 
-  const elDiagFondo = document.getElementById('diag-card-fondo');
-  if (elDiagFondo) elDiagFondo.textContent = `${predio.fondo.toFixed(2)} m`;
+  ['diag-card-fondo', 'diag-card-fondo-m'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = `${predio.fondo.toFixed(2)} m`;
+  });
 
-  const elDiagZonif = document.getElementById('diag-card-zonif');
-  if (elDiagZonif) elDiagZonif.textContent = predio.zonificacion;
+  ['diag-card-zonif', 'diag-card-zonif-m'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = predio.zonificacion;
+  });
 
-  const elDiagTrat = document.getElementById('diag-card-tratamiento');
-  if (elDiagTrat) elDiagTrat.textContent = predio.tratamiento;
+  ['diag-card-tratamiento', 'diag-card-tratamiento-m'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = predio.tratamiento;
+  });
 
-  const elDiagAltura = document.getElementById('diag-card-altura');
-  if (elDiagAltura) elDiagAltura.textContent = `${predio.norma.pisosMaximos} Pisos (${predio.norma.alturaMaximaMetros.toFixed(2)} m)`;
+  ['diag-card-altura', 'diag-card-altura-m'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = `${predio.norma.pisosMaximos} Pisos (${predio.norma.alturaMaximaMetros.toFixed(2)} m)`;
+  });
 
   const elDiagAisl = document.getElementById('diag-card-aislamiento');
   if (elDiagAisl) elDiagAisl.textContent = `Exigido ${predio.norma.aislamientoPosteriorMin.toFixed(2)} m`;
