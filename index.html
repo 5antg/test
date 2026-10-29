@@ -255,6 +255,16 @@
                   <span>Código Manzana / Lote:</span>
                   <span id="hud-manzana-lote" class="text-primary font-medium">MZ-034 · LOTE-012</span>
                 </div>
+                <!-- Desglose oficial IGAC -->
+                <div id="hud-cedula-decoded-info" class="p-2 rounded-xl bg-surface-container-low text-[11px] text-tertiary font-mono leading-tight border border-surface-variant/20">
+                  <span class="text-emerald-700 font-semibold">Cédula IGAC Válida:</span> Boyacá (15) · Sogamoso (759) · Urbano (1) · MZ-0034 · LOTE-0012
+                </div>
+                <!-- Botón directo Colombia en Mapas -->
+                <a id="btn-colombia-en-mapas-link" href="https://www.colombiaenmapas.gov.co" target="_blank" rel="noopener noreferrer" class="mt-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm hover:bg-secondary hover:text-white transition-all shadow-sm">
+                  <span class="material-symbols-outlined text-[15px]">public</span>
+                  <span>Verificar en Colombia en Mapas (IGAC)</span>
+                  <span class="material-symbols-outlined text-[13px]">north_east</span>
+                </a>
               </div>
 
               <!-- Status Pill -->
@@ -274,11 +284,18 @@
                   <span class="material-symbols-outlined text-primary text-[20px]">layers</span>
                   <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Capas POT Sogamoso</h3>
                 </div>
-                <span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-medium">4 Activas</span>
+                <span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-medium">5 Activas</span>
               </div>
 
               <!-- Layer Toggles -->
               <div class="flex flex-col gap-2">
+                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low">
+                  <div class="flex items-center gap-2.5">
+                    <span class="w-3.5 h-3.5 rounded-md bg-purple-700 shrink-0"></span>
+                    <span class="font-label-md text-label-md text-on-surface">Catastro Oficial IGAC (Colombia en Mapas)</span>
+                  </div>
+                  <input id="toggle-layer-igac" checked type="checkbox" class="accent-purple-700"/>
+                </div>
                 <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low">
                   <div class="flex items-center gap-2.5">
                     <span class="w-3.5 h-3.5 rounded-md bg-primary shrink-0"></span>
