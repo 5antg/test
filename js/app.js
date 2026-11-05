@@ -118,10 +118,10 @@ export function switchTab(tabId) {
     
     if (isDesktop) {
       if (path === tabId) {
-        link.className = "px-space-md py-2 transition-all duration-200 bg-surface-container-highest text-primary font-medium rounded-full shadow-sm";
+        link.className = "px-2.5 py-1.5 transition-all duration-200 bg-surface-container-highest text-primary font-medium rounded-full shadow-sm";
         link.setAttribute('aria-current', 'page');
       } else {
-        link.className = "px-space-md py-2 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200";
+        link.className = "px-2.5 py-1.5 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200";
         link.removeAttribute('aria-current');
       }
     } else {
