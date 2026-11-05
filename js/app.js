@@ -1,4 +1,4 @@
-import { PREDIOS_PRESET, CATALOGO_PLANOS_POT, FORMULAS_CESIONES, CAPAS_GEOJSON_POT } from './data/pot-sogamoso.js';
+﻿import { PREDIOS_PRESET, CATALOGO_PLANOS_POT, FORMULAS_CESIONES, CAPAS_GEOJSON_POT } from './data/pot-sogamoso.js';
 import { 
   auth, 
   db, 
@@ -16,7 +16,7 @@ import {
 // Estado Global Reactivo de la Aplicación
 const state = {
   activeTab: 'explorador',
-  mapMode: 'osm', // 'osm' | 'igac' | 'cad' (Leaflet interactivo por defecto)
+  mapMode: 'leaflet', // 'leaflet' | 'svg'
   currentPredio: PREDIOS_PRESET[0], // Por defecto predio Cl. 26 & Cra. 12 (13.993,92 m²)
   allPredios: [...PREDIOS_PRESET],
   proposals: {
@@ -44,11 +44,7 @@ const state = {
     tratamientos: null,
     vias: null,
     ambiental: null
-  },
-  drawnItems: null,
-  drawControl: null,
-  selectedPlanos: new Set(['U-01', 'U-02']),
-  userNotes: ''
+  }
 };
 
 // Inicialización cuando carga el DOM
@@ -211,26 +207,19 @@ function initLeafletMap() {
     zoomControl: false
   });
 
-  // Capa base satelital / urbana
+  // Capa base satelital ESRI World Imagery (libre, sin API key)
+  const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 19,
+    attribution: 'Imagery: Esri, Maxar, GeoEye | POT Sogamoso 2016 | IGAC'
+  });
+  satelliteLayer.addTo(state.leafletMap);
+
+  // Etiquetas de calles (OSM semitransparente encima del satelital)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
-    attribution: '© OpenStreetMap | POT Sogamoso 2016 | IGAC Colombia en Mapas'
+    opacity: 0.30,
+    attribution: ''
   }).addTo(state.leafletMap);
-
-  // Capa WMS de Catastro IGAC
-  try {
-    state.igacCatastroLayer = L.tileLayer.wms('https://mapas.igac.gov.co/server/services/catastro/wms/MapServer/WMSServer', {
-      layers: '0,1,2',
-      format: 'image/png',
-      transparent: true,
-      opacity: 0.65,
-      attribution: 'Límites Prediales: IGAC / Colombia en Mapas',
-      maxZoom: 20
-    });
-    state.igacCatastroLayer.addTo(state.leafletMap);
-  } catch (err) {
-    console.warn("Servicio WMS de IGAC temporalmente no disponible.", err);
-  }
 
   // Toggle de la capa IGAC en el DOM
   const igacToggle = document.getElementById('toggle-layer-igac');
@@ -244,75 +233,6 @@ function initLeafletMap() {
           state.leafletMap.removeLayer(state.igacCatastroLayer);
         }
       }
-    });
-  }
-
-  // Inicializar FeatureGroup para polígonos dibujados por el usuario
-  if (typeof L.FeatureGroup !== 'undefined') {
-    state.drawnItems = new L.FeatureGroup();
-    state.leafletMap.addLayer(state.drawnItems);
-  }
-
-  // Escuchar eventos de dibujo de Leaflet.draw de forma segura
-  if (L.Draw && L.Draw.Event) {
-    state.leafletMap.on(L.Draw.Event.CREATED, (event) => {
-      const layer = event.layer;
-      if (state.drawnItems) {
-        state.drawnItems.clearLayers();
-        state.drawnItems.addLayer(layer);
-      }
-
-      // Calcular área del polígono dibujado (Fórmula geodésica de polígono)
-      if (layer instanceof L.Polygon) {
-        const latlngs = layer.getLatLngs()[0];
-        const areaM2 = (typeof L.GeometryUtil !== 'undefined' && L.GeometryUtil.geodesicArea) 
-          ? L.GeometryUtil.geodesicArea(latlngs) 
-          : calculatePolygonAreaApprox(latlngs);
-        
-        // Obtener centroide del polígono
-        const bounds = layer.getBounds();
-        const center = bounds.getCenter();
-        
-        // Crear predio a partir del área dibujada
-        createCustomPredioFromCoords(center.lat, center.lng);
-        state.currentPredio.areaTerreno = Math.round(areaM2 * 100) / 100;
-        state.currentPredio.direccion = `Predio Delimitado Manualmente (${areaM2.toFixed(1)} m²)`;
-        
-        // Calcular perímetro aproximado
-        let perimetro = 0;
-        for (let i = 0; i < latlngs.length; i++) {
-          const next = (i + 1) % latlngs.length;
-          perimetro += latlngs[i].distanceTo(latlngs[next]);
-        }
-        state.currentPredio.frente = Math.round(Math.sqrt(areaM2 * 0.4) * 10) / 10;
-        state.currentPredio.fondo = Math.round((areaM2 / state.currentPredio.frente) * 10) / 10;
-        
-        syncAllViews(state.currentPredio);
-        showToast(`✓ Predio delimitado: ${areaM2.toFixed(1)} m² de área y ${perimetro.toFixed(1)} m de perímetro.`);
-      }
-    });
-  }
-
-  // Botón "Delimitar Predio"
-  const btnDrawLot = document.getElementById('btn-draw-lot');
-  if (btnDrawLot) {
-    btnDrawLot.addEventListener('click', () => {
-      setMapMode('osm');
-      if (typeof L.Draw === 'undefined' || !L.Draw.Polygon) {
-        showToast('⚠️ Módulo de dibujo no disponible en este momento. Haz clic directo en el mapa para ubicar.');
-        return;
-      }
-      showToast('✏️ Haz clic en el mapa para marcar los vértices de tu lote. Doble clic para cerrar el polígono.');
-      
-      const polygonDrawer = new L.Draw.Polygon(state.leafletMap, {
-        shapeOptions: {
-          color: '#059669',
-          fillColor: '#10b981',
-          fillOpacity: 0.35,
-          weight: 3
-        }
-      });
-      polygonDrawer.enable();
     });
   }
 
@@ -333,61 +253,28 @@ function initLeafletMap() {
     state.leafletMap.setView([state.currentPredio.coordenadas.lat, state.currentPredio.coordenadas.lng], 18);
   });
 
-  // Controladores de botones de modo de mapa
-  const btnModeIgac = document.getElementById('btn-mode-igac');
-  const btnModeOsm = document.getElementById('btn-mode-osm');
-  const btnModeCad = document.getElementById('btn-mode-cad');
+  // Alternador con plano CAD SVG
+  const toggleMapBtn = document.getElementById('btn-toggle-map-mode');
+  if (toggleMapBtn) {
+    toggleMapBtn.addEventListener('click', () => {
+      const leafletContainer = document.getElementById('leaflet-map-wrapper');
+      const svgContainer = document.getElementById('svg-map-wrapper');
+      const modeLabel = document.getElementById('map-mode-label');
 
-  const leafletContainer = document.getElementById('leaflet-map-wrapper');
-  const svgContainer = document.getElementById('svg-map-wrapper');
-  const igacContainer = document.getElementById('igac-iframe-wrapper');
-  const igacFrame = document.getElementById('igac-live-frame');
-  const modeLabel = document.getElementById('map-mode-label');
-
-  function setMapMode(mode) {
-    state.mapMode = mode;
-    
-    // Reset buttons style
-    [btnModeIgac, btnModeOsm, btnModeCad].forEach(b => {
-      if (b) {
-        b.className = "px-3 py-1 rounded-full text-label-sm text-tertiary hover:text-primary font-medium transition-all flex items-center gap-1";
+      if (state.mapMode === 'leaflet') {
+        state.mapMode = 'svg';
+        leafletContainer.classList.add('hidden');
+        svgContainer.classList.remove('hidden');
+        if (modeLabel) modeLabel.textContent = "Vista Planimétrica CAD (SVG)";
+      } else {
+        state.mapMode = 'leaflet';
+        svgContainer.classList.add('hidden');
+        leafletContainer.classList.remove('hidden');
+        if (modeLabel) modeLabel.textContent = "Mapa Satelital / Urbano (Leaflet)";
+        if (state.leafletMap) state.leafletMap.invalidateSize();
       }
     });
-
-    if (mode === 'igac') {
-      if (btnModeIgac) btnModeIgac.className = "px-3 py-1 rounded-full text-label-sm bg-purple-700 text-white font-semibold shadow-sm transition-all flex items-center gap-1";
-      if (igacContainer) igacContainer.classList.remove('hidden');
-      if (leafletContainer) leafletContainer.classList.add('hidden');
-      if (svgContainer) svgContainer.classList.add('hidden');
-      if (modeLabel) modeLabel.textContent = "Geovisor Oficial IGAC (Colombia en Mapas)";
-
-      // Actualizar vista IGAC con las coordenadas del predio actual
-      const lat = state.currentPredio.coordenadas.lat;
-      const lng = state.currentPredio.coordenadas.lng;
-      const igacUrl = `https://www.colombiaenmapas.gov.co/?e=${(lng - 0.005).toFixed(4)},${(lat - 0.005).toFixed(4)},${(lng + 0.005).toFixed(4)},${(lat + 0.005).toFixed(4)},4326&b=igac&u=0&t=catastro`;
-      if (igacFrame) igacFrame.src = igacUrl;
-    } else if (mode === 'osm') {
-      if (btnModeOsm) btnModeOsm.className = "px-3 py-1 rounded-full text-label-sm bg-primary text-white font-semibold shadow-sm transition-all flex items-center gap-1";
-      if (igacContainer) igacContainer.classList.add('hidden');
-      if (leafletContainer) leafletContainer.classList.remove('hidden');
-      if (svgContainer) svgContainer.classList.add('hidden');
-      if (modeLabel) modeLabel.textContent = "Mapa Calles / Satelital (Leaflet)";
-      if (state.leafletMap) {
-        state.leafletMap.invalidateSize();
-        state.leafletMap.setView([state.currentPredio.coordenadas.lat, state.currentPredio.coordenadas.lng], 17);
-      }
-    } else if (mode === 'cad') {
-      if (btnModeCad) btnModeCad.className = "px-3 py-1 rounded-full text-label-sm bg-purple-900 text-white font-semibold shadow-sm transition-all flex items-center gap-1";
-      if (igacContainer) igacContainer.classList.add('hidden');
-      if (leafletContainer) leafletContainer.classList.add('hidden');
-      if (svgContainer) svgContainer.classList.remove('hidden');
-      if (modeLabel) modeLabel.textContent = "Vista Planimétrica CAD (SVG)";
-    }
   }
-
-  if (btnModeIgac) btnModeIgac.addEventListener('click', () => setMapMode('igac'));
-  if (btnModeOsm) btnModeOsm.addEventListener('click', () => setMapMode('osm'));
-  if (btnModeCad) btnModeCad.addEventListener('click', () => setMapMode('cad'));
 }
 
 /**
@@ -488,18 +375,13 @@ export function decodeCadastralCode(code) {
 
 function updateColombiaEnMapasLink(predio) {
   const btnIgac = document.getElementById('btn-colombia-en-mapas-link');
-  const btnIgacDirect = document.getElementById('btn-open-igac-direct');
-  const igacFrame = document.getElementById('igac-live-frame');
+  if (!btnIgac) return;
 
   const lat = predio.coordenadas.lat;
   const lng = predio.coordenadas.lng;
   
   const url = `https://www.colombiaenmapas.gov.co/?e=${(lng - 0.005).toFixed(4)},${(lat - 0.005).toFixed(4)},${(lng + 0.005).toFixed(4)},${(lat + 0.005).toFixed(4)},4326&b=igac&u=0&t=catastro`;
-  if (btnIgac) btnIgac.href = url;
-  if (btnIgacDirect) btnIgacDirect.href = url;
-  if (igacFrame && state.mapMode === 'igac') {
-    igacFrame.src = url;
-  }
+  btnIgac.href = url;
 }
 
 // --- Constantes de grilla urbana de Sogamoso ---
@@ -518,50 +400,9 @@ const CALLE_LAT_STEP = 0.000845;
 //   Distancia longitudinal por carrera ≈ 0.00088 grados (~97 metros)
 const CARRERA_LNG_STEP = 0.00088;
 
-// Función de cálculo geométrico aproximado de área de polígonos si no está disponible GeometryUtil
-function calculatePolygonAreaApprox(coords) {
-  let area = 0;
-  if (coords.length > 2) {
-    for (let i = 0; i < coords.length; i++) {
-      const p1 = coords[i];
-      const p2 = coords[(i + 1) % coords.length];
-      const x1 = p1.lng * 111139 * Math.cos(p1.lat * Math.PI / 180);
-      const y1 = p1.lat * 111139;
-      const x2 = p2.lng * 111139 * Math.cos(p2.lat * Math.PI / 180);
-      const y2 = p2.lat * 111139;
-      area += (x1 * y2 - x2 * y1);
-    }
-    area = Math.abs(area) / 2;
-  }
-  return area;
-}
-
 function isWithinSogamoso(lat, lng) {
   // Perímetro urbano aproximado del municipio de Sogamoso, Boyacá
   return lat >= 5.690 && lat <= 5.765 && lng >= -72.980 && lng <= -72.900;
-}
-
-// --- Geocodificador con Nominatim OSM en vivo + Fallback Determinístico ---
-async function geocodeSogamosoOnline(query) {
-  try {
-    const encoded = encodeURIComponent(`${query}, Sogamoso, Boyaca, Colombia`);
-    const resp = await fetch(`https://nominatim.openstreetmap.org/search?q=${encoded}&format=json&limit=1`, {
-      headers: { 'Accept': 'application/json' }
-    });
-    if (resp.ok) {
-      const data = await resp.json();
-      if (data && data.length > 0) {
-        const lat = parseFloat(data[0].lat);
-        const lng = parseFloat(data[0].lon);
-        if (isWithinSogamoso(lat, lng)) {
-          return { lat, lng, displayName: data[0].display_name };
-        }
-      }
-    }
-  } catch (e) {
-    console.warn("Geocodificador online no disponible, usando grilla interna:", e);
-  }
-  return null;
 }
 
 // --- Geocodificador determinístico para calles de Sogamoso ---
@@ -830,7 +671,7 @@ function initSearch() {
   const searchInput = document.getElementById('main-search-input');
   const searchBtn = document.getElementById('main-search-btn');
 
-  async function executeSearch() {
+  function executeSearch() {
     const query = searchInput.value.trim().toLowerCase();
     if (!query) return;
 
@@ -850,6 +691,7 @@ function initSearch() {
     const cleanDigits = query.replace(/\D/g, '');
     if (cleanDigits.length >= 15) {
       const decoded = decodeCadastralCode(cleanDigits);
+      // Usar coordenadas del centro de Sogamoso como referencia (sin random)
       createCustomPredioFromCoords(5.7148, -72.9333);
       state.currentPredio.codigoCatastral = cleanDigits.padEnd(30, '0');
       state.currentPredio.direccion = `Predio Catastral IGAC (${decoded.manzana} · ${decoded.lote})`;
@@ -857,21 +699,13 @@ function initSearch() {
       return;
     }
 
-    // 3. Intento A: Geocodificador online oficial de OpenStreetMap
-    const onlineCoords = await geocodeSogamosoOnline(query);
-    if (onlineCoords) {
-      createCustomPredioFromCoords(onlineCoords.lat, onlineCoords.lng);
-      state.leafletMap.setView([onlineCoords.lat, onlineCoords.lng], 18);
-      return;
-    }
-
-    // 4. Intento B: Geocodificador de grilla interna matemática
+    // 3. Geocodificador determinístico por calles y carreras
     const coords = geocodeSogamoso(query);
     if (coords) {
       createCustomPredioFromCoords(coords.lat, coords.lng);
       state.leafletMap.setView([coords.lat, coords.lng], 18);
     } else {
-      showToast('📍 Dirección no encontrada. Intenta con "Cra 11 Cl 26" o haz clic en el mapa de Sogamoso.');
+      showToast('📍 Dirección no encontrada. Intenta con "Cl 26 Cra 12" o haz clic en el mapa de Sogamoso.');
     }
   }
 
@@ -1214,19 +1048,11 @@ function updateCesionesView(predio) {
 }
 
 /* ==========================================================================
-   7. PLANOTECA OFICIAL POT 2016 (VISOR DE PLANOS PDF DEL DRIVE Y SELECTOR)
+   7. PLANOTECA OFICIAL POT 2016 (VISOR DE PLANOS PDF DEL DRIVE)
    ========================================================================== */
 function initPlanoteca() {
   const container = document.getElementById('planoteca-categories-container');
-  const countBadge = document.getElementById('btn-selected-plans-count');
-  const btnDownloadCompendium = document.getElementById('btn-download-selected-plans');
   if (!container) return;
-
-  function updateSelectedCount() {
-    if (countBadge) {
-      countBadge.textContent = `Descargar Planos Seleccionados (${state.selectedPlanos.size})`;
-    }
-  }
 
   container.innerHTML = '';
 
@@ -1234,12 +1060,9 @@ function initPlanoteca() {
     const card = document.createElement('div');
     card.className = "bg-surface-container-lowest rounded-2xl p-space-md shadow-sm flex flex-col gap-space-sm border border-surface-variant/40";
     
-    let planosHtml = cat.planos.map(plano => {
-      const isChecked = state.selectedPlanos.has(plano.codigo) ? 'checked' : '';
-      return `
+    let planosHtml = cat.planos.map(plano => `
       <div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all">
         <div class="flex items-center gap-3">
-          <input type="checkbox" data-plano-code="${plano.codigo}" ${isChecked} class="plano-checkbox w-4 h-4 accent-purple-700 cursor-pointer rounded"/>
           <span class="w-8 h-8 rounded-full bg-primary/10 text-primary font-mono font-semibold text-label-sm flex items-center justify-center">${plano.codigo}</span>
           <div class="flex flex-col">
             <h5 class="font-headline-sm text-[15px] font-semibold text-on-surface">${plano.titulo}</h5>
@@ -1249,66 +1072,16 @@ function initPlanoteca() {
         <div class="flex items-center gap-2">
           <a href="${plano.urlDescarga}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm hover:bg-primary-container transition-all shadow-sm">
             <span class="material-symbols-outlined text-[16px]">visibility</span>
-            <span>Ver PDF</span>
+            <span>Ver en Drive</span>
           </a>
         </div>
       </div>
-    `}).join('');
+    `).join('');
 
     card.innerHTML = `
       <div class="flex items-center justify-between pb-2 border-b border-surface-variant/30">
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-primary text-[22px]">map</span>
-          <h4 class="font-headline-sm text-headline-sm font-semibold text-on-surface">${cat.categoria}</h4>
-        </div>
-        <span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-medium">${cat.planos.length} Planos</span>
-      </div>
-      <p class="font-body-sm text-body-sm text-tertiary">${cat.descripcion}</p>
-      <div class="flex flex-col gap-2 pt-2">
-        ${planosHtml}
-      </div>
-    `;
-
-    container.appendChild(card);
-  });
-
-  // Escuchar cambios en los checkboxes de planos
-  container.addEventListener('change', (e) => {
-    if (e.target && e.target.classList.contains('plano-checkbox')) {
-      const code = e.target.getAttribute('data-plano-code');
-      if (e.target.checked) {
-        state.selectedPlanos.add(code);
-      } else {
-        state.selectedPlanos.delete(code);
-      }
-      updateSelectedCount();
-    }
-  });
-
-  // Botón para compendio de planos seleccionados
-  if (btnDownloadCompendium) {
-    btnDownloadCompendium.addEventListener('click', () => {
-      if (state.selectedPlanos.size === 0) {
-        showToast('⚠️ Selecciona al menos un plano con la casilla de verificación.');
-        return;
-      }
-      
-      // Abrir enlaces de los planos seleccionados
-      let abiertos = 0;
-      CATALOGO_PLANOS_POT.forEach(cat => {
-        cat.planos.forEach(p => {
-          if (state.selectedPlanos.has(p.codigo)) {
-            window.open(p.urlDescarga, '_blank');
-            abiertos++;
-          }
-        });
-      });
-      showToast(`✓ Abriendo ${abiertos} plano(s) oficial(es) del POT seleccionados.`);
-    });
-  }
-
-  updateSelectedCount();
-}
           <h4 class="font-headline-sm text-headline-sm font-semibold text-on-surface">${cat.categoria}</h4>
         </div>
         <span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-medium">${cat.planos.length} Planos</span>
@@ -1608,67 +1381,6 @@ function generateAndPrintDossier() {
     elProp.textContent = `${prop.pisos} Pisos (${prop.altura} m) · Ocupación P1: ${prop.ocupacionP1} m² · Área Total Construida: ${prop.totalConstruido} m² · Retiro Post: ${prop.aislamientoPosterior} m`;
   }
 
-  // Vista Satelital estática para el PDF
-  const mapImg = document.getElementById('dossier-print-map-img');
-  const mapFallback = document.getElementById('dossier-print-map-fallback');
-  const coordsText = document.getElementById('dossier-print-coords-text');
-
-  if (coordsText) {
-    coordsText.textContent = `${predio.coordenadas.texto} · Norte: ${predio.coordenadas.norteMagna} · Este: ${predio.coordenadas.esteMagna}`;
-  }
-
-  if (mapImg) {
-    const lat = predio.coordenadas.lat;
-    const lng = predio.coordenadas.lng;
-    // Mapa estático libre sin requerir API keys de pago (zoom 17 centrado en el predio)
-    mapImg.src = `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=17&size=600x200&maptype=mapnik&markers=${lat},${lng},ol-marker`;
-    mapImg.onerror = () => {
-      mapImg.classList.add('hidden');
-      if (mapFallback) mapFallback.classList.remove('hidden');
-    };
-  }
-
-  // Llenar observaciones del usuario
-  const elUserNotes = document.getElementById('dossier-print-user-notes');
-  if (elUserNotes) {
-    elUserNotes.textContent = state.userNotes || "Evaluación urbanística preliminar de viabilidad según Acuerdo Municipal 029 del 28 de diciembre de 2016 (POT Sogamoso).";
-  }
-
-  // Llenar planos de referencia seleccionados
-  const elPlansList = document.getElementById('dossier-print-plans-list');
-  if (elPlansList) {
-    const planosNombres = [];
-    CATALOGO_PLANOS_POT.forEach(cat => {
-      cat.planos.forEach(p => {
-        if (state.selectedPlanos.has(p.codigo)) {
-          planosNombres.push(`• Plano ${p.codigo}: ${p.titulo} (${p.escala})`);
-        }
-      });
-    });
-    if (planosNombres.length > 0) {
-      elPlansList.innerHTML = planosNombres.map(n => `<p>${n}</p>`).join('');
-    } else {
-      elPlansList.innerHTML = `<p>• Consulta cartográfica general del POT Sogamoso 2016.</p>`;
-    }
-  }
-
-  // Descargar directo con html2pdf si está disponible en móvil, o ventana de impresión
-  const printSection = document.getElementById('dossier-print-section');
-  const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
-
-  if (isMobile && typeof html2pdf !== 'undefined' && printSection) {
-    printSection.classList.remove('hidden');
-    const opt = {
-      margin: 10,
-      filename: `Dossier_POT_Sogamoso_${predio.direccion.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
-    };
-    html2pdf().set(opt).from(printSection).save().then(() => {
-      printSection.classList.add('hidden');
-    });
-  } else {
-    window.print();
-  }
+  // Ejecutar impresión / Guardar como PDF del navegador
+  window.print();
 }
