@@ -1456,6 +1456,43 @@ function generateAndPrintDossier() {
     elProp.textContent = `${prop.pisos} Pisos (${prop.altura} m) · Ocupación P1: ${prop.ocupacionP1} m² · Área Total Construida: ${prop.totalConstruido} m² · Retiro Post: ${prop.aislamientoPosterior} m`;
   }
 
-  // Ejecutar impresión / Guardar como PDF del navegador
-  window.print();
+  // Vista Satelital estática para el PDF
+  const mapImg = document.getElementById('dossier-print-map-img');
+  const mapFallback = document.getElementById('dossier-print-map-fallback');
+  const coordsText = document.getElementById('dossier-print-coords-text');
+
+  if (coordsText) {
+    coordsText.textContent = `${predio.coordenadas.texto} · Norte: ${predio.coordenadas.norteMagna} · Este: ${predio.coordenadas.esteMagna}`;
+  }
+
+  if (mapImg) {
+    const lat = predio.coordenadas.lat;
+    const lng = predio.coordenadas.lng;
+    // Mapa estático libre sin requerir API keys de pago (zoom 17 centrado en el predio)
+    mapImg.src = `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=17&size=600x200&maptype=mapnik&markers=${lat},${lng},ol-marker`;
+    mapImg.onerror = () => {
+      mapImg.classList.add('hidden');
+      if (mapFallback) mapFallback.classList.remove('hidden');
+    };
+  }
+
+  // Descargar directo con html2pdf si está disponible en móvil, o ventana de impresión
+  const printSection = document.getElementById('dossier-print-section');
+  const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+
+  if (isMobile && typeof html2pdf !== 'undefined' && printSection) {
+    printSection.classList.remove('hidden');
+    const opt = {
+      margin: 10,
+      filename: `Dossier_POT_Sogamoso_${predio.direccion.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(printSection).save().then(() => {
+      printSection.classList.add('hidden');
+    });
+  } else {
+    window.print();
+  }
 }
