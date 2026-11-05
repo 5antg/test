@@ -16,6 +16,9 @@
   <!-- Leaflet CSS para Mapas Interactivos -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
+  <!-- html2pdf.js para Exportación Directa de PDF en Móvil y PC -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script id="tailwind-config">
@@ -225,7 +228,7 @@
               <!-- Barra de Búsqueda -->
               <div class="relative w-full">
                 <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-tertiary text-[20px]">search</span>
-                <input id="main-search-input" class="w-full pl-11 pr-24 py-2.5 rounded-full bg-surface-container-low font-body-sm text-body-sm text-on-surface placeholder:text-outline-variant focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all" placeholder="Buscar dirección, barrio o cédula..." type="text" value="Calle 11 # 14-25, Sogamoso"/>
+                <input id="main-search-input" class="w-full pl-11 pr-24 py-2.5 rounded-full bg-surface-container-low font-body-sm text-body-sm text-on-surface placeholder:text-outline-variant focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all" placeholder="Buscar dirección, barrio o cédula..." type="text" value="Cl. 26 & Cra. 12, Sogamoso"/>
                 <button id="main-search-btn" class="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1 rounded-full bg-primary text-on-primary font-label-sm text-label-sm hover:bg-primary-container transition-all">
                   Buscar
                 </button>
@@ -234,6 +237,9 @@
               <!-- Quick Presets -->
               <div class="flex flex-wrap gap-1.5 pt-1">
                 <span class="text-[11px] text-tertiary uppercase font-label-sm tracking-wider w-full">Ejemplos típicos en Sogamoso:</span>
+                <button onclick="window.selectPreset('predio-calle26-cra12')" class="px-2.5 py-1 rounded-full bg-primary/10 text-primary font-bold border border-primary/30 hover:bg-primary hover:text-white transition-all shadow-sm">
+                  ★ Cl. 26 & Cra. 12 (1.4 Ha · Sec. 11)
+                </button>
                 <button onclick="window.selectPreset('predio-rosario')" class="px-2.5 py-1 rounded-full bg-surface-container text-primary font-label-sm text-label-sm hover:bg-primary hover:text-white transition-all">
                   El Rosario (Mixto)
                 </button>
@@ -289,33 +295,40 @@
 
               <!-- Layer Toggles -->
               <div class="flex flex-col gap-2">
-                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low">
+                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all">
                   <div class="flex items-center gap-2.5">
-                    <span class="w-3.5 h-3.5 rounded-md bg-purple-700 shrink-0"></span>
-                    <span class="font-label-md text-label-md text-on-surface">Catastro Oficial IGAC (Colombia en Mapas)</span>
+                    <span class="w-3.5 h-3.5 rounded-md bg-purple-700 shrink-0 shadow-xs"></span>
+                    <span class="font-label-md text-label-md text-on-surface">Catastro Oficial IGAC (WMS)</span>
                   </div>
-                  <input id="toggle-layer-igac" checked type="checkbox" class="accent-purple-700"/>
+                  <input id="toggle-layer-igac" checked type="checkbox" class="accent-purple-700 cursor-pointer"/>
                 </div>
-                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low">
+                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all">
                   <div class="flex items-center gap-2.5">
-                    <span class="w-3.5 h-3.5 rounded-md bg-primary shrink-0"></span>
-                    <span class="font-label-md text-label-md text-on-surface">Usos de Suelo (CAM / Residencial)</span>
+                    <span class="w-3.5 h-3.5 rounded-md bg-primary shrink-0 shadow-xs"></span>
+                    <span class="font-label-md text-label-md text-on-surface">Usos de Suelo (CAM / R-4 / Sec. 11)</span>
                   </div>
-                  <input checked type="checkbox" class="accent-primary"/>
+                  <input id="toggle-layer-usos" checked type="checkbox" class="accent-primary cursor-pointer"/>
                 </div>
-                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low">
+                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all">
                   <div class="flex items-center gap-2.5">
-                    <span class="w-3.5 h-3.5 rounded-md bg-secondary shrink-0"></span>
+                    <span class="w-3.5 h-3.5 rounded-md bg-amber-500 shrink-0 shadow-xs"></span>
                     <span class="font-label-md text-label-md text-on-surface">Tratamientos Urbanísticos (UTD)</span>
                   </div>
-                  <input checked type="checkbox" class="accent-secondary"/>
+                  <input id="toggle-layer-tratamientos" checked type="checkbox" class="accent-amber-500 cursor-pointer"/>
                 </div>
-                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low">
+                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all">
                   <div class="flex items-center gap-2.5">
-                    <span class="w-3.5 h-3.5 rounded-md bg-emerald-600 shrink-0"></span>
+                    <span class="w-3.5 h-3.5 rounded-md bg-red-600 shrink-0 shadow-xs"></span>
                     <span class="font-label-md text-label-md text-on-surface">Malla Vial Arterial & Colectoras</span>
                   </div>
-                  <input checked type="checkbox" class="accent-emerald-600"/>
+                  <input id="toggle-layer-vias" checked type="checkbox" class="accent-red-600 cursor-pointer"/>
+                </div>
+                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all">
+                  <div class="flex items-center gap-2.5">
+                    <span class="w-3.5 h-3.5 rounded-md bg-cyan-600 shrink-0 shadow-xs"></span>
+                    <span class="font-label-md text-label-md text-on-surface">Ronda Hídrica & Protección Ambiental</span>
+                  </div>
+                  <input id="toggle-layer-ambiental" checked type="checkbox" class="accent-cyan-600 cursor-pointer"/>
                 </div>
               </div>
 

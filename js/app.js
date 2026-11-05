@@ -1,4 +1,4 @@
-import { PREDIOS_PRESET, CATALOGO_PLANOS_POT, FORMULAS_CESIONES } from './data/pot-sogamoso.js';
+import { PREDIOS_PRESET, CATALOGO_PLANOS_POT, FORMULAS_CESIONES, CAPAS_GEOJSON_POT } from './data/pot-sogamoso.js';
 import { 
   auth, 
   db, 
@@ -17,31 +17,58 @@ import {
 const state = {
   activeTab: 'explorador',
   mapMode: 'leaflet', // 'leaflet' | 'svg'
-  currentPredio: PREDIOS_PRESET[0],
+  currentPredio: PREDIOS_PRESET[0], // Por defecto predio Cl. 26 & Cra. 12 (13.993,92 m²)
   allPredios: [...PREDIOS_PRESET],
   proposals: {
     uso: 'mixto',
-    ocupacionP1: 280.0,
-    pisos: 5,
-    altura: 15.8,
-    totalConstruido: 1120.0,
-    aislamientoPosterior: 3.2,
-    antejardin: 2.5
+    ocupacionP1: 8396.0,
+    pisos: 6,
+    altura: 19.8,
+    totalConstruido: 33585.0,
+    aislamientoPosterior: 5.0,
+    antejardin: 5.0
   },
   cesionesInputs: {
-    unidadesVivienda: 10,
-    localesComerciales: 2,
-    modalidadCompensacion: 'dinero' // 'sitio' | 'dinero'
+    unidadesVivienda: 120,
+    localesComerciales: 8,
+    modalidadCompensacion: 'sitio' // 'sitio' | 'dinero'
   },
   savedEvaluations: [],
   currentUser: null,
   leafletMap: null,
   activeMarker: null,
   igacCatastroLayer: null,
-  isIgacLayerActive: true
+  isIgacLayerActive: true,
+  vectorLayers: {
+    usos: null,
+    tratamientos: null,
+    vias: null,
+    ambiental: null
+  }
 };
 
 // Inicialización cuando carga el DOM
+// --- Utilidad: Toast de notificación ---
+function showToast(msg, duracion = 4000) {
+  let toast = document.getElementById('app-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'app-toast';
+    toast.style.cssText = [
+      'position:fixed', 'bottom:1.5rem', 'left:50%', 'transform:translateX(-50%)',
+      'background:#1e1a2e', 'color:#fff', 'padding:0.75rem 1.5rem',
+      'border-radius:0.75rem', 'font-size:0.95rem', 'z-index:9999',
+      'box-shadow:0 4px 24px rgba(0,0,0,0.3)', 'max-width:90vw', 'text-align:center',
+      'transition:opacity 0.3s'
+    ].join(';');
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => { toast.style.opacity = '0'; }, duracion);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   loadSavedEvaluations();
   initNavigation();
@@ -216,9 +243,13 @@ function initLeafletMap() {
     });
   }
 
-  // Clic en el mapa para capturar predio
+  // Clic en el mapa para capturar predio — solo dentro de Sogamoso
   state.leafletMap.on('click', (e) => {
     const { lat, lng } = e.latlng;
+    if (!isWithinSogamoso(lat, lng)) {
+      showToast('⚠️ Este punto está fuera del perímetro urbano de Sogamoso. Haz clic dentro de la ciudad.');
+      return;
+    }
     createCustomPredioFromCoords(lat, lng);
   });
 
@@ -360,20 +391,89 @@ function updateColombiaEnMapasLink(predio) {
   btnIgac.href = url;
 }
 
+// --- Validador de perímetro urbano de Sogamoso ---
+function isWithinSogamoso(lat, lng) {
+  // Perímetro urbano aproximado del municipio de Sogamoso, Boyacá
+  return lat >= 5.695 && lat <= 5.760 && lng >= -72.980 && lng <= -72.900;
+}
+
+// --- Geocodificador determinístico para calles de Sogamoso ---
+function geocodeSogamoso(query) {
+  // Alias de lugares conocidos
+  const aliases = {
+    'parque de la villa': { lat: 5.7148, lng: -72.9333 },
+    'alcaldia': { lat: 5.7152, lng: -72.9340 },
+    'palacio municipal': { lat: 5.7152, lng: -72.9340 },
+    'terminal': { lat: 5.7250, lng: -72.9280 },
+    'aeropuerto': { lat: 5.6773, lng: -72.9538 },
+    'mochaca': { lat: 5.7420, lng: -72.9100 },
+    'cataluña': { lat: 5.7050, lng: -72.9200 },
+    'el rosario': { lat: 5.7200, lng: -72.9410 },
+    'sugamuxi': { lat: 5.7148, lng: -72.9333 },
+  };
+
+  const q = query.toLowerCase();
+  for (const [key, coords] of Object.entries(aliases)) {
+    if (q.includes(key)) return coords;
+  }
+
+  // Fórmula de grilla urbana de Sogamoso:
+  // Calles corren E-O: a mayor número de calle → más al sur (lat menor)
+  // Carreras corren N-S: a mayor número de carrera → más al oeste (lng menor)
+  // Centro de referencia: Parque de la Villa ≈ Cl 11 & Cra 11 → lat 5.7148, lng -72.9333
+  const calleMatch = q.match(/(?:calle|cl\.?|c\.)\s*(\d+)/);
+  const carreraMatch = q.match(/(?:carrera|cra\.?|cr\.?|k\.?)\s*(\d+)/);
+
+  let lat = 5.7148;
+  let lng = -72.9333;
+  let found = false;
+
+  if (calleMatch) {
+    const num = parseInt(calleMatch[1], 10);
+    // Cl 11 = referencia (5.7148). Cada calle ≈ 0.0028° de latitud
+    lat = 5.7148 + (11 - num) * 0.0028;
+    found = true;
+  }
+  if (carreraMatch) {
+    const num = parseInt(carreraMatch[1], 10);
+    // Cra 11 = referencia (-72.9333). Cada carrera ≈ 0.0030° de longitud
+    lng = -72.9333 - (num - 11) * 0.0030;
+    found = true;
+  }
+
+  if (found && isWithinSogamoso(lat, lng)) {
+    return { lat, lng };
+  }
+  return null;
+}
+
 function createCustomPredioFromCoords(lat, lng) {
-  const mzRandom = String(Math.floor(10 + Math.random() * 80)).padStart(4, '0');
-  const loteRandom = String(Math.floor(1 + Math.random() * 40)).padStart(4, '0');
-  const cedulaIGAC = `15759010102${mzRandom}${loteRandom}0000000000`;
+  // Derivar sector a partir de coordenadas reales dentro de Sogamoso
+  const latDelta = lat - 5.7148; // positivo = norte del Parque de la Villa
+  const lngDelta = lng - (-72.9333); // positivo = este del centro
+
+  // Estimar número de calle y carrera por posición
+  const calleNum = Math.round(11 - latDelta / 0.0028);
+  const craNum   = Math.round(11 + lngDelta / 0.0030);
+
+  // Generar código catastral con calle/carrera codificados (sin random)
+  const mzCode = String(Math.abs(calleNum * 10 + craNum) % 90 + 10).padStart(4, '0');
+  const loteCode = String((Math.abs(calleNum + craNum) % 20) + 1).padStart(4, '0');
+  const cedulaIGAC = `15759010102${mzCode}${loteCode}0000000000`;
+
+  // Coordenadas MAGNA-SIRGAS aproximadas (sin random)
+  const norteMagna = (1108000 + (lat - 5.6950) * 110574).toFixed(2);
+  const esteMagna  = (1124000 + (lng - (-72.9800)) * 101775).toFixed(2);
 
   const customPredio = {
     id: `custom-${Date.now()}`,
     codigoCatastral: cedulaIGAC,
-    matricula: `095-${Math.floor(100000 + Math.random() * 900000)}`,
-    direccion: `Coordenadas [${lat.toFixed(4)}, ${lng.toFixed(4)}]`,
+    matricula: `095-${(parseInt(mzCode) * 100 + parseInt(loteCode)).toString().padStart(6, '0')}`,
+    direccion: `Cl. ${calleNum} & Cra. ${craNum}, Sogamoso`,
     barrio: "Sector Urbano Central",
     comuna: "Comuna 02 Sugamuxi",
-    manzana: `MZ-${mzRandom.substring(2)}`,
-    lote: `LOTE-${loteRandom.substring(2)}`,
+    manzana: `MZ-${mzCode}`,
+    lote: `LOTE-${loteCode}`,
     areaTerreno: 420.00,
     frente: 14.00,
     fondo: 30.00,
@@ -382,8 +482,8 @@ function createCustomPredioFromCoords(lat, lng) {
     coordenadas: {
       lat: lat,
       lng: lng,
-      norteMagna: `${(1108000 + Math.random() * 1000).toFixed(2)} m`,
-      esteMagna: `${(1124000 + Math.random() * 1000).toFixed(2)} m`,
+      norteMagna: `${norteMagna} m`,
+      esteMagna: `${esteMagna} m`,
       texto: `${lat.toFixed(5)}°N, ${Math.abs(lng).toFixed(5)}°W`
     },
     tratamiento: "Consolidación Urbana (TU-2)",
@@ -499,6 +599,7 @@ function initSearch() {
     const query = searchInput.value.trim().toLowerCase();
     if (!query) return;
 
+    // 1. Buscar en predios preset existentes
     const found = state.allPredios.find(p => 
       p.direccion.toLowerCase().includes(query) ||
       p.codigoCatastral.includes(query) ||
@@ -507,21 +608,28 @@ function initSearch() {
 
     if (found) {
       setPredioActivo(found);
+      return;
+    }
+
+    // 2. Código catastral IGAC (≥15 dígitos)
+    const cleanDigits = query.replace(/\D/g, '');
+    if (cleanDigits.length >= 15) {
+      const decoded = decodeCadastralCode(cleanDigits);
+      // Usar coordenadas del centro de Sogamoso como referencia (sin random)
+      createCustomPredioFromCoords(5.7148, -72.9333);
+      state.currentPredio.codigoCatastral = cleanDigits.padEnd(30, '0');
+      state.currentPredio.direccion = `Predio Catastral IGAC (${decoded.manzana} · ${decoded.lote})`;
+      syncAllViews(state.currentPredio);
+      return;
+    }
+
+    // 3. Geocodificador determinístico por calles y carreras
+    const coords = geocodeSogamoso(query);
+    if (coords) {
+      createCustomPredioFromCoords(coords.lat, coords.lng);
+      state.leafletMap.setView([coords.lat, coords.lng], 18);
     } else {
-      const cleanDigits = query.replace(/\D/g, '');
-      if (cleanDigits.length >= 15) {
-        const decoded = decodeCadastralCode(cleanDigits);
-        const lat = 5.7148 + (Math.random() - 0.5) * 0.015;
-        const lng = -72.9333 + (Math.random() - 0.5) * 0.015;
-        createCustomPredioFromCoords(lat, lng);
-        state.currentPredio.codigoCatastral = cleanDigits.padEnd(30, '0');
-        state.currentPredio.direccion = `Predio Catastral IGAC (${decoded.manzana} · ${decoded.lote})`;
-        syncAllViews(state.currentPredio);
-      } else {
-        const lat = 5.7148 + (Math.random() - 0.5) * 0.02;
-        const lng = -72.9333 + (Math.random() - 0.5) * 0.02;
-        createCustomPredioFromCoords(lat, lng);
-      }
+      showToast('📍 Dirección no encontrada. Intenta con "Cl 26 Cra 12" o haz clic en el mapa de Sogamoso.');
     }
   }
 

@@ -5,6 +5,64 @@
 
 export const PREDIOS_PRESET = [
   {
+    id: "predio-calle26-cra12",
+    codigoCatastral: "157590103000001150001000",
+    matricula: "095-892401",
+    direccion: "Cl. 26 & Cra. 12",
+    barrio: "Sector 11 (Norte / Suelo de Expansión)",
+    comuna: "Comuna 03 Norte",
+    manzana: "MZ-115",
+    lote: "LOTE-001",
+    areaTerreno: 13993.92, // Área oficial verificada con IGAC (1.39 Ha)
+    frente: 95.00,
+    fondo: 147.30,
+    estrato: 4,
+    perfilVial: "V-2 (Eje Calle 26 Doble Calzada, 24.00 m)",
+    coordenadas: {
+      lat: 5.7275,
+      lng: -72.9273,
+      norteMagna: "1.109.650,20 m",
+      esteMagna: "1.125.405,80 m",
+      texto: "5°43'39.0\"N 72°55'38.3\"W"
+    },
+    tratamiento: "Desarrollo Urbano (TU-1)",
+    tratamientoDesc: "Suelo urbano no consolidado que debe ser incorporado a la estructura urbana mediante plan de desarrollo, garantizando cesiones obligatorias públicas y provisión de redes matrices (Alcaldía de Sogamoso - Acuerdo 029/2016).",
+    zonificacion: "ZUR-D (Zona de Desarrollo - Sector 11)",
+    zonificacionDesc: "Área de desarrollo con vocación para proyectos residenciales de escala intermedia/alta, equipamientos dotacionales y servicios comerciales.",
+    norma: {
+      indiceOcupacionMax: 0.60, // 60%
+      indiceConstruccionMax: 2.40, // 2.4 x lote
+      pisosMaximos: 6,
+      alturaMaximaMetros: 19.80,
+      aislamientoPosteriorMin: 5.00,
+      aislamientoLateralMin: 3.00,
+      antejardinMin: 5.00,
+      voladizoMax: 1.00,
+      parqueaderosRatio: "1 cupo cada 80 m² útiles + 1 visitante cada 4 unidades",
+      articulos: {
+        ocupacion: "Art. 185 Acuerdo 029/2016",
+        construccion: "Art. 187 Acuerdo 029/2016",
+        altura: "Art. 193 Acuerdo 029/2016",
+        aislamiento: "Art. 199 Acuerdo 029/2016",
+        antejardin: "Art. 205 Acuerdo 029/2016",
+        cesiones: "Art. 217 Acuerdo 029/2016 (Cesiones Tipo A y B)"
+      }
+    },
+    usos: {
+      permitidos: ["Vivienda Multifamiliar en Conjunto", "Equipamientos Dotacionales y Educativos", "Comercio de Cobertura Zonal", "Servicios de Salud y Asistenciales"],
+      compatibles: ["Oficinas y Sedes Institucionales", "Centros Deportivos y Recreativos", "Comercio Minorista y Supermercados"],
+      condicionados: ["Estaciones de Servicio de Combustible (con estudio de impacto vial)", "Talleres de Mantenimiento Menor", "Centros de Distribución Local"],
+      prohibidos: ["Industria Pesada o de Alto Impacto Ambiental", "Minería", "Discotecas y Bares Masivos"]
+    },
+    amenazaRiesgo: "Bajo (Área apta para urbanización con obras de drenaje pluvial)",
+    equipamientosCercanos: [
+      { nombre: "UPTC Sede Sogamoso", tipo: "Educación Superior", distancia: "650 m", icon: "school" },
+      { nombre: "Terminal de Transportes", tipo: "Movilidad", distancia: "850 m", icon: "directions_bus" },
+      { nombre: "Parque Recreativo del Norte", tipo: "Recreación", distancia: "420 m", icon: "park" },
+      { nombre: "Clínica de Especialistas", tipo: "Salud", distancia: "780 m", icon: "local_hospital" }
+    ]
+  },
+  {
     id: "predio-rosario",
     codigoCatastral: "157590102000000340012000",
     matricula: "095-481920",
@@ -349,4 +407,336 @@ export const FORMULAS_CESIONES = {
   porcentajeEquipamientoComunal: 0.08, // 8% sobre área neta
   porcentajeViasLocales: 0.15, // 15% estimado
   valorMetroCuadradoSueloRefCOP: 480000 // Valor de referencia catastral/comercial para liquidación de compensación en Sogamoso
+};
+
+/**
+ * CAPAS CARTOGRÁFICAS OFICIALES DEL POT DE SOGAMOSO (GEOJSON VECTORIAL)
+ * Polígonos de zonificación, tratamientos, vías estructurantes y reservas hídricas/ambientales.
+ */
+export const CAPAS_GEOJSON_POT = {
+  usosSuelo: {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: {
+          codigo: "CAM-1",
+          nombre: "Corredor de Actividad Múltiple Central (CAM-1)",
+          tipo: "Comercial / Servicios",
+          color: "#7e22ce", // Purple
+          fillColor: "#9333ea",
+          fillOpacity: 0.25,
+          descripcion: "Centro tradicional de Sogamoso (Plaza de la Villa a Plaza España)."
+        },
+        geometry: {
+          type: "Polygon",
+          coordinates: [[
+            [-72.9365, 5.7125],
+            [-72.9300, 5.7135],
+            [-72.9295, 5.7205],
+            [-72.9355, 5.7195],
+            [-72.9365, 5.7125]
+          ]]
+        }
+      },
+      {
+        type: "Feature",
+        properties: {
+          codigo: "CAM-2",
+          nombre: "Corredor Mixto El Rosario (CAM-2)",
+          tipo: "Comercio P1 + Vivienda",
+          color: "#4f46e5", // Indigo
+          fillColor: "#6366f1",
+          fillOpacity: 0.25,
+          descripcion: "Eje de la Calle 11 y carrera 14 hacia El Rosario."
+        },
+        geometry: {
+          type: "Polygon",
+          coordinates: [[
+            [-72.9350, 5.7145],
+            [-72.9305, 5.7150],
+            [-72.9300, 5.7180],
+            [-72.9348, 5.7175],
+            [-72.9350, 5.7145]
+          ]]
+        }
+      },
+      {
+        type: "Feature",
+        properties: {
+          codigo: "ZUR-H",
+          nombre: "Zona Histórica Mochacá (BIC Grado 2)",
+          tipo: "Conservación Patrimonial",
+          color: "#c2410c", // Amber/Orange
+          fillColor: "#ea580c",
+          fillOpacity: 0.35,
+          descripcion: "Centro colonial de Mochacá y Plaza de Santa Bárbara."
+        },
+        geometry: {
+          type: "Polygon",
+          coordinates: [[
+            [-72.9390, 5.7120],
+            [-72.9350, 5.7120],
+            [-72.9345, 5.7150],
+            [-72.9385, 5.7150],
+            [-72.9390, 5.7120]
+          ]]
+        }
+      },
+      {
+        type: "Feature",
+        properties: {
+          codigo: "R-4",
+          nombre: "Residencial de Alta Densidad Cataluña (R-4)",
+          tipo: "Vivienda Multifamiliar en Altura",
+          color: "#0284c7", // Sky blue
+          fillColor: "#38bdf8",
+          fillOpacity: 0.25,
+          descripcion: "Sectores Cataluña y El Recreo con torres de hasta 8 pisos."
+        },
+        geometry: {
+          type: "Polygon",
+          coordinates: [[
+            [-72.9310, 5.7215],
+            [-72.9255, 5.7225],
+            [-72.9250, 5.7265],
+            [-72.9305, 5.7255],
+            [-72.9310, 5.7215]
+          ]]
+        }
+      },
+      {
+        type: "Feature",
+        properties: {
+          codigo: "ZUR-D (Sec. 11)",
+          nombre: "Sector 11 — Suelo de Expansión Urbana y Desarrollo",
+          tipo: "Desarrollo / Gran Escala",
+          color: "#059669", // Emerald
+          fillColor: "#10b981",
+          fillOpacity: 0.28,
+          descripcion: "Zona norte Cl 26 con Cra 12 (lote de 1.39 Ha analizado)."
+        },
+        geometry: {
+          type: "Polygon",
+          coordinates: [[
+            [-72.9315, 5.7255],
+            [-72.9240, 5.7265],
+            [-72.9230, 5.7315],
+            [-72.9305, 5.7305],
+            [-72.9315, 5.7255]
+          ]]
+        }
+      }
+    ]
+  },
+
+  tratamientos: {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: {
+          nombre: "Consolidación Urbana (TU-2)",
+          color: "#eab308",
+          fillColor: "#facc15",
+          fillOpacity: 0.20,
+          reglamentacion: "Suelo consolidado con densificación moderada y mantenimiento predial."
+        },
+        geometry: {
+          type: "Polygon",
+          coordinates: [[
+            [-72.9370, 5.7130],
+            [-72.9260, 5.7145],
+            [-72.9250, 5.7240],
+            [-72.9360, 5.7225],
+            [-72.9370, 5.7130]
+          ]]
+        }
+      },
+      {
+        type: "Feature",
+        properties: {
+          nombre: "Desarrollo Urbano (TU-1)",
+          color: "#0d9488",
+          fillColor: "#14b8a6",
+          fillOpacity: 0.25,
+          reglamentacion: "Suelo de desarrollo con exigencia obligatoria de cesiones públicas y redes matrices."
+        },
+        geometry: {
+          type: "Polygon",
+          coordinates: [[
+            [-72.9320, 5.7245],
+            [-72.9220, 5.7255],
+            [-72.9210, 5.7330],
+            [-72.9310, 5.7320],
+            [-72.9320, 5.7245]
+          ]]
+        }
+      },
+      {
+        type: "Feature",
+        properties: {
+          nombre: "Conservación Patrimonial",
+          color: "#b45309",
+          fillColor: "#d97706",
+          fillOpacity: 0.30,
+          reglamentacion: "Protección estricta de tipologías y volumetrías históricas (Mochacá)."
+        },
+        geometry: {
+          type: "Polygon",
+          coordinates: [[
+            [-72.9400, 5.7110],
+            [-72.9340, 5.7110],
+            [-72.9335, 5.7160],
+            [-72.9395, 5.7160],
+            [-72.9400, 5.7110]
+          ]]
+        }
+      }
+    ]
+  },
+
+  mallaVial: {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: {
+          nombre: "Carrera 11 (Eje Arterial Principal V-2)",
+          color: "#dc2626",
+          weight: 4,
+          perfil: "Ancho mínimo 20.00 m · Transporte masivo y mixto"
+        },
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [-72.9350, 5.7060],
+            [-72.9335, 5.7150],
+            [-72.9315, 5.7230],
+            [-72.9290, 5.7320]
+          ]
+        }
+      },
+      {
+        type: "Feature",
+        properties: {
+          nombre: "Carrera 12 (Eje Colector Urbano V-3)",
+          color: "#ea580c",
+          weight: 3.5,
+          perfil: "Ancho mínimo 15.00 m · Conector residencial norte"
+        },
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [-72.9340, 5.7080],
+            [-72.9325, 5.7160],
+            [-72.9300, 5.7250],
+            [-72.9273, 5.7310]
+          ]
+        }
+      },
+      {
+        type: "Feature",
+        properties: {
+          nombre: "Calle 11 (Eje Comercial Central V-3)",
+          color: "#2563eb",
+          weight: 3.5,
+          perfil: "Ancho mínimo 14.00 m · Vía colectora de comercio"
+        },
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [-72.9420, 5.7155],
+            [-72.9325, 5.7162],
+            [-72.9230, 5.7170]
+          ]
+        }
+      },
+      {
+        type: "Feature",
+        properties: {
+          nombre: "Calle 26 (Avenida Norte Doble Calzada V-2)",
+          color: "#dc2626",
+          weight: 4,
+          perfil: "Ancho mínimo 24.00 m · Conector intermodal y UPTC"
+        },
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [-72.9360, 5.7268],
+            [-72.9273, 5.7275],
+            [-72.9200, 5.7282]
+          ]
+        }
+      },
+      {
+        type: "Feature",
+        properties: {
+          nombre: "Avenida San Martín (Calle 7 Arterial V-1)",
+          color: "#7c3aed",
+          weight: 4.5,
+          perfil: "Ancho 30.00 m · Anillo perimetral sur"
+        },
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [-72.9440, 5.7090],
+            [-72.9320, 5.7105],
+            [-72.9210, 5.7118]
+          ]
+        }
+      }
+    ]
+  },
+
+  proteccionAmbiental: {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: {
+          nombre: "Ronda Hídrica y de Protección — Río Moniquirá",
+          color: "#0891b2", // Cyan/Teal
+          fillColor: "#06b6d4",
+          fillOpacity: 0.35,
+          restriccion: "Ronda de 30 metros de aislamiento de protección estricta (Art. 56 POT)."
+        },
+        geometry: {
+          type: "Polygon",
+          coordinates: [[
+            [-72.9410, 5.7080],
+            [-72.9395, 5.7140],
+            [-72.9370, 5.7200],
+            [-72.9355, 5.7270],
+            [-72.9340, 5.7270],
+            [-72.9355, 5.7200],
+            [-72.9380, 5.7140],
+            [-72.9395, 5.7080],
+            [-72.9410, 5.7080]
+          ]]
+        }
+      },
+      {
+        type: "Feature",
+        properties: {
+          nombre: "Zona de Reserva y Cerros Orientales de Sogamoso",
+          color: "#15803d",
+          fillColor: "#22c55e",
+          fillOpacity: 0.25,
+          restriccion: "Suelo de protección ambiental y forestal. Prohibida la urbanización masiva."
+        },
+        geometry: {
+          type: "Polygon",
+          coordinates: [[
+            [-72.9230, 5.7050],
+            [-72.9200, 5.7150],
+            [-72.9190, 5.7280],
+            [-72.9150, 5.7320],
+            [-72.9120, 5.7050],
+            [-72.9230, 5.7050]
+          ]]
+        }
+      }
+    ]
+  }
 };
