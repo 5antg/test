@@ -391,24 +391,38 @@ function updateColombiaEnMapasLink(predio) {
   btnIgac.href = url;
 }
 
-// --- Validador de perímetro urbano de Sogamoso ---
+// --- Constantes de grilla urbana de Sogamoso ---
+// Parque de la Villa ≈ Calle 11 con Carrera 11
+const REFERENCE_LAT = 5.7148;
+const REFERENCE_LNG = -72.9333;
+const REFERENCE_CALLE = 11;
+const REFERENCE_CARRERA = 11;
+
+// En Sogamoso:
+// - Las calles aumentan hacia el NORTE (Cl. 11 está al sur de Cl. 26 y Cl. 36) -> Latitud aumenta con la calle.
+//   Distancia latitudinal por calle ≈ 0.000845 grados (~94 metros)
+const CALLE_LAT_STEP = 0.000845;
+
+// - Las carreras aumentan hacia el OCCIDENTE / OESTE (Cra. 11 es más al este que Cra. 14, 18, 20) -> Longitud se hace más negativa (-72.9333 -> -72.9400)
+//   Distancia longitudinal por carrera ≈ 0.00088 grados (~97 metros)
+const CARRERA_LNG_STEP = 0.00088;
+
 function isWithinSogamoso(lat, lng) {
   // Perímetro urbano aproximado del municipio de Sogamoso, Boyacá
-  return lat >= 5.695 && lat <= 5.760 && lng >= -72.980 && lng <= -72.900;
+  return lat >= 5.690 && lat <= 5.765 && lng >= -72.980 && lng <= -72.900;
 }
 
 // --- Geocodificador determinístico para calles de Sogamoso ---
 function geocodeSogamoso(query) {
-  // Alias de lugares conocidos
   const aliases = {
     'parque de la villa': { lat: 5.7148, lng: -72.9333 },
     'alcaldia': { lat: 5.7152, lng: -72.9340 },
     'palacio municipal': { lat: 5.7152, lng: -72.9340 },
     'terminal': { lat: 5.7250, lng: -72.9280 },
     'aeropuerto': { lat: 5.6773, lng: -72.9538 },
-    'mochaca': { lat: 5.7420, lng: -72.9100 },
-    'cataluña': { lat: 5.7050, lng: -72.9200 },
-    'el rosario': { lat: 5.7200, lng: -72.9410 },
+    'mochaca': { lat: 5.7135, lng: -72.9360 },
+    'cataluña': { lat: 5.7230, lng: -72.9280 },
+    'el rosario': { lat: 5.7162, lng: -72.9325 },
     'sugamuxi': { lat: 5.7148, lng: -72.9333 },
   };
 
@@ -417,27 +431,23 @@ function geocodeSogamoso(query) {
     if (q.includes(key)) return coords;
   }
 
-  // Fórmula de grilla urbana de Sogamoso:
-  // Calles corren E-O: a mayor número de calle → más al sur (lat menor)
-  // Carreras corren N-S: a mayor número de carrera → más al oeste (lng menor)
-  // Centro de referencia: Parque de la Villa ≈ Cl 11 & Cra 11 → lat 5.7148, lng -72.9333
   const calleMatch = q.match(/(?:calle|cl\.?|c\.)\s*(\d+)/);
   const carreraMatch = q.match(/(?:carrera|cra\.?|cr\.?|k\.?)\s*(\d+)/);
 
-  let lat = 5.7148;
-  let lng = -72.9333;
+  let lat = REFERENCE_LAT;
+  let lng = REFERENCE_LNG;
   let found = false;
 
   if (calleMatch) {
     const num = parseInt(calleMatch[1], 10);
-    // Cl 11 = referencia (5.7148). Cada calle ≈ 0.0028° de latitud
-    lat = 5.7148 + (11 - num) * 0.0028;
+    // Calle mayor = más al Norte (lat mayor)
+    lat = REFERENCE_LAT + (num - REFERENCE_CALLE) * CALLE_LAT_STEP;
     found = true;
   }
   if (carreraMatch) {
     const num = parseInt(carreraMatch[1], 10);
-    // Cra 11 = referencia (-72.9333). Cada carrera ≈ 0.0030° de longitud
-    lng = -72.9333 - (num - 11) * 0.0030;
+    // Carrera mayor = más al Occidente (lng más negativa)
+    lng = REFERENCE_LNG - (num - REFERENCE_CARRERA) * CARRERA_LNG_STEP;
     found = true;
   }
 
@@ -448,37 +458,133 @@ function geocodeSogamoso(query) {
 }
 
 function createCustomPredioFromCoords(lat, lng) {
-  // Derivar sector a partir de coordenadas reales dentro de Sogamoso
-  const latDelta = lat - 5.7148; // positivo = norte del Parque de la Villa
-  const lngDelta = lng - (-72.9333); // positivo = este del centro
+  // Derivar calle y carrera aproximadas según la grilla oficial de Sogamoso
+  // Calles aumentan hacia el norte (+lat) respecto a Calle 11 (lat 5.7148)
+  const calleNum = Math.max(1, Math.round(REFERENCE_CALLE + (lat - REFERENCE_LAT) / CALLE_LAT_STEP));
+  // Carreras aumentan hacia el occidente (-lng) respecto a Carrera 11 (lng -72.9333)
+  const craNum = Math.max(1, Math.round(REFERENCE_CARRERA - (lng - REFERENCE_LNG) / CARRERA_LNG_STEP));
 
-  // Estimar número de calle y carrera por posición
-  const calleNum = Math.round(11 - latDelta / 0.0028);
-  const craNum   = Math.round(11 + lngDelta / 0.0030);
-
-  // Generar código catastral con calle/carrera codificados (sin random)
+  // Generar código catastral determinístico con manzana y lote basados en la ubicación
   const mzCode = String(Math.abs(calleNum * 10 + craNum) % 90 + 10).padStart(4, '0');
-  const loteCode = String((Math.abs(calleNum + craNum) % 20) + 1).padStart(4, '0');
+  const loteCode = String((Math.abs(calleNum + craNum) % 30) + 1).padStart(4, '0');
   const cedulaIGAC = `15759010102${mzCode}${loteCode}0000000000`;
 
-  // Coordenadas MAGNA-SIRGAS aproximadas (sin random)
+  // Coordenadas MAGNA-SIRGAS Origen Central aproximadas
   const norteMagna = (1108000 + (lat - 5.6950) * 110574).toFixed(2);
   const esteMagna  = (1124000 + (lng - (-72.9800)) * 101775).toFixed(2);
+
+  // Determinar dinámicamente el tratamiento, zonificación y norma según la zona geográfica de Sogamoso
+  let barrio = "Sector Urbano Central";
+  let comuna = "Comuna 02 Sugamuxi";
+  let tratamiento = "Consolidación Urbana (TU-2)";
+  let tratamientoDesc = "Mantenimiento y consolidación de la estructura predial existente con redensificación moderada.";
+  let zonificacion = "CAM-2 (Mixto Comercial / Residencial)";
+  let zonificacionDesc = "Comercio en primeros pisos y vivienda en niveles superiores.";
+  let perfilVial = "V-3 (Calle Urbana Colectora, 12.00 m)";
+  let norma = {
+    indiceOcupacionMax: 0.70,
+    indiceConstruccionMax: 2.80,
+    pisosMaximos: 5,
+    alturaMaximaMetros: 16.50,
+    aislamientoPosteriorMin: 3.00,
+    aislamientoLateralMin: 0.00,
+    antejardinMin: 2.50,
+    voladizoMax: 0.80,
+    parqueaderosRatio: "1 cupo cada 2 viviendas + 1 visitante cada 5",
+    articulos: {
+      ocupacion: "Art. 184 Acuerdo 029/2016",
+      construccion: "Art. 186 Acuerdo 029/2016",
+      altura: "Art. 192 Acuerdo 029/2016",
+      aislamiento: "Art. 198 Acuerdo 029/2016",
+      antejardin: "Art. 204 Acuerdo 029/2016",
+      cesiones: "Art. 215 Acuerdo 029/2016"
+    }
+  };
+  let usos = {
+    permitidos: ["Vivienda Multifamiliar", "Comercio Minorista P1"],
+    compatibles: ["Oficinas y Consultorios Médicos"],
+    condicionados: ["Talleres y Bodegas Menores"],
+    prohibidos: ["Industria de Alto Impacto", "Discotecas Masivas"]
+  };
+
+  // Zona Norte / Expansión (Calle 25 en adelante, o cerca de Sector 11)
+  if (calleNum >= 24 || lat > 5.7250) {
+    barrio = "Sector 11 (Norte / Suelo de Expansión)";
+    comuna = "Comuna 03 Norte";
+    tratamiento = "Desarrollo Urbano (TU-1)";
+    tratamientoDesc = "Suelo urbano y de expansión sujeto a plan de desarrollo con cesiones obligatorias y redes matrices (Acuerdo 029/2016).";
+    zonificacion = "ZUR-D (Zona de Desarrollo - Sector 11)";
+    zonificacionDesc = "Área de desarrollo para vivienda multifamiliar en conjunto, equipamientos y servicios comerciales.";
+    perfilVial = "V-2 (Eje Arterial / Colector Doble Calzada, 24.00 m)";
+    norma = {
+      indiceOcupacionMax: 0.60,
+      indiceConstruccionMax: 2.40,
+      pisosMaximos: 6,
+      alturaMaximaMetros: 19.80,
+      aislamientoPosteriorMin: 5.00,
+      aislamientoLateralMin: 3.00,
+      antejardinMin: 5.00,
+      voladizoMax: 1.00,
+      parqueaderosRatio: "1 cupo cada 80 m² útiles + 1 visitante cada 4 unidades",
+      articulos: {
+        ocupacion: "Art. 185 Acuerdo 029/2016",
+        construccion: "Art. 187 Acuerdo 029/2016",
+        altura: "Art. 193 Acuerdo 029/2016",
+        aislamiento: "Art. 199 Acuerdo 029/2016",
+        antejardin: "Art. 205 Acuerdo 029/2016",
+        cesiones: "Art. 217 Acuerdo 029/2016"
+      }
+    };
+    usos = {
+      permitidos: ["Vivienda Multifamiliar en Conjunto", "Equipamientos Dotacionales", "Comercio de Cobertura Zonal"],
+      compatibles: ["Oficinas e Institucionales", "Centros Recreativos y Supermercados"],
+      condicionados: ["Estaciones de Servicio", "Talleres Menores"],
+      prohibidos: ["Industria Pesada", "Minería", "Discotecas Masivas"]
+    };
+  } else if (calleNum <= 9 && craNum <= 10) {
+    // Zona Histórica Mochacá / Centro Histórico
+    barrio = "Mochacá (Centro Histórico)";
+    comuna = "Comuna 01 Centro";
+    tratamiento = "Conservación Patrimonial (BIC Grado 2)";
+    tratamientoDesc = "Protección de arquitectura tradicional colonial y republicana con alineamiento histórico estricto.";
+    zonificacion = "ZUR-H (Zona Histórica Mochacá)";
+    zonificacionDesc = "Sector de preservación cultural y patrimonio arquitectónico.";
+    perfilVial = "V-5 (Vía Tradicional Compartida, 8.00 m)";
+    norma = {
+      indiceOcupacionMax: 0.60,
+      indiceConstruccionMax: 1.40,
+      pisosMaximos: 2,
+      alturaMaximaMetros: 7.50,
+      aislamientoPosteriorMin: 4.00,
+      aislamientoLateralMin: 0.00,
+      antejardinMin: 0.00,
+      voladizoMax: 0.00,
+      parqueaderosRatio: "Exento según patio interior existente",
+      articulos: {
+        ocupacion: "Art. 240 Acuerdo 029/2016",
+        construccion: "Art. 242 Acuerdo 029/2016",
+        altura: "Art. 245 Acuerdo 029/2016",
+        aislamiento: "Art. 248 Acuerdo 029/2016",
+        antejardin: "Art. 250 Acuerdo 029/2016",
+        cesiones: "Exento por conservación patrimonial"
+      }
+    };
+  }
 
   const customPredio = {
     id: `custom-${Date.now()}`,
     codigoCatastral: cedulaIGAC,
     matricula: `095-${(parseInt(mzCode) * 100 + parseInt(loteCode)).toString().padStart(6, '0')}`,
     direccion: `Cl. ${calleNum} & Cra. ${craNum}, Sogamoso`,
-    barrio: "Sector Urbano Central",
-    comuna: "Comuna 02 Sugamuxi",
+    barrio: barrio,
+    comuna: comuna,
     manzana: `MZ-${mzCode}`,
     lote: `LOTE-${loteCode}`,
-    areaTerreno: 420.00,
-    frente: 14.00,
-    fondo: 30.00,
+    areaTerreno: calleNum >= 24 ? 13993.92 : 420.00,
+    frente: calleNum >= 24 ? 95.00 : 14.00,
+    fondo: calleNum >= 24 ? 147.30 : 30.00,
     estrato: 4,
-    perfilVial: "V-3 (Calle Urbana Colectora, 12.00 m)",
+    perfilVial: perfilVial,
     coordenadas: {
       lat: lat,
       lng: lng,
@@ -486,39 +592,16 @@ function createCustomPredioFromCoords(lat, lng) {
       esteMagna: `${esteMagna} m`,
       texto: `${lat.toFixed(5)}°N, ${Math.abs(lng).toFixed(5)}°W`
     },
-    tratamiento: "Consolidación Urbana (TU-2)",
-    tratamientoDesc: "Reglamentación del Acuerdo 029 de 2016 para suelo urbano consolidado de Sogamoso.",
-    zonificacion: "CAM-2 (Mixto Comercial / Residencial)",
-    zonificacionDesc: "Comercio en primeros pisos y vivienda en niveles superiores.",
-    norma: {
-      indiceOcupacionMax: 0.70,
-      indiceConstruccionMax: 2.80,
-      pisosMaximos: 5,
-      alturaMaximaMetros: 16.50,
-      aislamientoPosteriorMin: 3.00,
-      aislamientoLateralMin: 0.00,
-      antejardinMin: 2.50,
-      voladizoMax: 0.80,
-      parqueaderosRatio: "1 cupo cada 2 viviendas + 1 visitante cada 5",
-      articulos: {
-        ocupacion: "Art. 184 Acuerdo 029/2016",
-        construccion: "Art. 186 Acuerdo 029/2016",
-        altura: "Art. 192 Acuerdo 029/2016",
-        aislamiento: "Art. 198 Acuerdo 029/2016",
-        antejardin: "Art. 204 Acuerdo 029/2016",
-        cesiones: "Art. 215 Acuerdo 029/2016"
-      }
-    },
-    usos: {
-      permitidos: ["Vivienda Multifamiliar", "Comercio Minorista P1"],
-      compatibles: ["Oficinas y Consultorios Médicos"],
-      condicionados: ["Talleres y Bodegas Menores"],
-      prohibidos: ["Industria de Alto Impacto", "Discotecas Masivas"]
-    },
+    tratamiento: tratamiento,
+    tratamientoDesc: tratamientoDesc,
+    zonificacion: zonificacion,
+    zonificacionDesc: zonificacionDesc,
+    norma: norma,
+    usos: usos,
     amenazaRiesgo: "Bajo (Área apta para construcción)",
     equipamientosCercanos: [
-      { nombre: "Parque Urbano Cercano", tipo: "Recreación", distancia: "390 m", icon: "park" },
-      { nombre: "Centro de Salud", tipo: "Salud", distancia: "650 m", icon: "local_hospital" }
+      { nombre: "Equipamiento Sectorial", tipo: "Dotacional", distancia: "320 m", icon: "park" },
+      { nombre: "Centro Asistencial", tipo: "Salud", distancia: "550 m", icon: "local_hospital" }
     ]
   };
 
