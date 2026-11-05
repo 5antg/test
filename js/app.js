@@ -260,21 +260,39 @@ function initLeafletMap() {
     state.leafletMap.setView([state.currentPredio.coordenadas.lat, state.currentPredio.coordenadas.lng], 18);
   });
 
-  // Alternador con plano CAD SVG
+  // Alternador de vistas del mapa: Leaflet -> Colombia en Mapas (IGAC) -> Plano CAD
   const toggleMapBtn = document.getElementById('btn-toggle-map-mode');
   if (toggleMapBtn) {
     toggleMapBtn.addEventListener('click', () => {
       const leafletContainer = document.getElementById('leaflet-map-wrapper');
       const svgContainer = document.getElementById('svg-map-wrapper');
+      const igacContainer = document.getElementById('igac-iframe-wrapper');
+      const igacFrame = document.getElementById('igac-live-frame');
       const modeLabel = document.getElementById('map-mode-label');
 
       if (state.mapMode === 'leaflet') {
+        state.mapMode = 'igac';
+        leafletContainer.classList.add('hidden');
+        svgContainer.classList.add('hidden');
+        if (igacContainer) igacContainer.classList.remove('hidden');
+        
+        // Cargar vista centrada en el lote actual en Colombia en Mapas
+        const lat = state.currentPredio.coordenadas.lat;
+        const lng = state.currentPredio.coordenadas.lng;
+        const igacUrl = `https://www.colombiaenmapas.gov.co/?e=${(lng - 0.005).toFixed(4)},${(lat - 0.005).toFixed(4)},${(lng + 0.005).toFixed(4)},${(lat + 0.005).toFixed(4)},4326&b=igac&u=0&t=catastro`;
+        if (igacFrame && (!igacFrame.src || igacFrame.src === 'about:blank' || !igacFrame.src.includes('colombiaenmapas'))) {
+          igacFrame.src = igacUrl;
+        }
+        if (modeLabel) modeLabel.textContent = "Geovisor Oficial IGAC (Colombia en Mapas)";
+      } else if (state.mapMode === 'igac') {
         state.mapMode = 'svg';
+        if (igacContainer) igacContainer.classList.add('hidden');
         leafletContainer.classList.add('hidden');
         svgContainer.classList.remove('hidden');
         if (modeLabel) modeLabel.textContent = "Vista Planimétrica CAD (SVG)";
       } else {
         state.mapMode = 'leaflet';
+        if (igacContainer) igacContainer.classList.add('hidden');
         svgContainer.classList.add('hidden');
         leafletContainer.classList.remove('hidden');
         if (modeLabel) modeLabel.textContent = "Mapa Satelital / Urbano (Leaflet)";
@@ -382,13 +400,15 @@ export function decodeCadastralCode(code) {
 
 function updateColombiaEnMapasLink(predio) {
   const btnIgac = document.getElementById('btn-colombia-en-mapas-link');
-  if (!btnIgac) return;
+  const btnIgacDirect = document.getElementById('btn-open-igac-direct');
+  if (!btnIgac && !btnIgacDirect) return;
 
   const lat = predio.coordenadas.lat;
   const lng = predio.coordenadas.lng;
   
   const url = `https://www.colombiaenmapas.gov.co/?e=${(lng - 0.005).toFixed(4)},${(lat - 0.005).toFixed(4)},${(lng + 0.005).toFixed(4)},${(lat + 0.005).toFixed(4)},4326&b=igac&u=0&t=catastro`;
-  btnIgac.href = url;
+  if (btnIgac) btnIgac.href = url;
+  if (btnIgacDirect) btnIgacDirect.href = url;
 }
 
 // --- Constantes de grilla urbana de Sogamoso ---
@@ -410,6 +430,29 @@ const CARRERA_LNG_STEP = 0.00088;
 function isWithinSogamoso(lat, lng) {
   // Perímetro urbano aproximado del municipio de Sogamoso, Boyacá
   return lat >= 5.690 && lat <= 5.765 && lng >= -72.980 && lng <= -72.900;
+}
+
+// --- Geocodificador con Nominatim OSM en vivo + Fallback Determinístico ---
+async function geocodeSogamosoOnline(query) {
+  try {
+    const encoded = encodeURIComponent(`${query}, Sogamoso, Boyaca, Colombia`);
+    const resp = await fetch(`https://nominatim.openstreetmap.org/search?q=${encoded}&format=json&limit=1`, {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lng = parseFloat(data[0].lon);
+        if (isWithinSogamoso(lat, lng)) {
+          return { lat, lng, displayName: data[0].display_name };
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Geocodificador online no disponible, usando grilla interna:", e);
+  }
+  return null;
 }
 
 // --- Geocodificador determinístico para calles de Sogamoso ---
@@ -678,7 +721,7 @@ function initSearch() {
   const searchInput = document.getElementById('main-search-input');
   const searchBtn = document.getElementById('main-search-btn');
 
-  function executeSearch() {
+  async function executeSearch() {
     const query = searchInput.value.trim().toLowerCase();
     if (!query) return;
 
@@ -698,7 +741,6 @@ function initSearch() {
     const cleanDigits = query.replace(/\D/g, '');
     if (cleanDigits.length >= 15) {
       const decoded = decodeCadastralCode(cleanDigits);
-      // Usar coordenadas del centro de Sogamoso como referencia (sin random)
       createCustomPredioFromCoords(5.7148, -72.9333);
       state.currentPredio.codigoCatastral = cleanDigits.padEnd(30, '0');
       state.currentPredio.direccion = `Predio Catastral IGAC (${decoded.manzana} · ${decoded.lote})`;
@@ -706,13 +748,21 @@ function initSearch() {
       return;
     }
 
-    // 3. Geocodificador determinístico por calles y carreras
+    // 3. Intento A: Geocodificador online oficial de OpenStreetMap
+    const onlineCoords = await geocodeSogamosoOnline(query);
+    if (onlineCoords) {
+      createCustomPredioFromCoords(onlineCoords.lat, onlineCoords.lng);
+      state.leafletMap.setView([onlineCoords.lat, onlineCoords.lng], 18);
+      return;
+    }
+
+    // 4. Intento B: Geocodificador de grilla interna matemática
     const coords = geocodeSogamoso(query);
     if (coords) {
       createCustomPredioFromCoords(coords.lat, coords.lng);
       state.leafletMap.setView([coords.lat, coords.lng], 18);
     } else {
-      showToast('📍 Dirección no encontrada. Intenta con "Cl 26 Cra 12" o haz clic en el mapa de Sogamoso.');
+      showToast('📍 Dirección no encontrada. Intenta con "Cra 11 Cl 26" o haz clic en el mapa de Sogamoso.');
     }
   }
 
