@@ -248,52 +248,62 @@ function initLeafletMap() {
   }
 
   // Inicializar FeatureGroup para polígonos dibujados por el usuario
-  state.drawnItems = new L.FeatureGroup();
-  state.leafletMap.addLayer(state.drawnItems);
+  if (typeof L.FeatureGroup !== 'undefined') {
+    state.drawnItems = new L.FeatureGroup();
+    state.leafletMap.addLayer(state.drawnItems);
+  }
 
-  // Escuchar eventos de dibujo de Leaflet.draw
-  state.leafletMap.on(L.Draw.Event.CREATED, (event) => {
-    const layer = event.layer;
-    state.drawnItems.clearLayers();
-    state.drawnItems.addLayer(layer);
-
-    // Calcular área del polígono dibujado (Fórmula geodésica de polígono)
-    if (layer instanceof L.Polygon) {
-      const latlngs = layer.getLatLngs()[0];
-      const areaM2 = L.GeometryUtil ? L.GeometryUtil.geodesicArea(latlngs) : calculatePolygonAreaApprox(latlngs);
-      
-      // Obtener centroide del polígono
-      const bounds = layer.getBounds();
-      const center = bounds.getCenter();
-      
-      // Crear predio a partir del área dibujada
-      createCustomPredioFromCoords(center.lat, center.lng);
-      state.currentPredio.areaTerreno = Math.round(areaM2 * 100) / 100;
-      state.currentPredio.direccion = `Predio Delimitado Manualmente (${areaM2.toFixed(1)} m²)`;
-      
-      // Calcular perímetro aproximado
-      let perimetro = 0;
-      for (let i = 0; i < latlngs.length; i++) {
-        const next = (i + 1) % latlngs.length;
-        perimetro += latlngs[i].distanceTo(latlngs[next]);
+  // Escuchar eventos de dibujo de Leaflet.draw de forma segura
+  if (L.Draw && L.Draw.Event) {
+    state.leafletMap.on(L.Draw.Event.CREATED, (event) => {
+      const layer = event.layer;
+      if (state.drawnItems) {
+        state.drawnItems.clearLayers();
+        state.drawnItems.addLayer(layer);
       }
-      state.currentPredio.frente = Math.round(Math.sqrt(areaM2 * 0.4) * 10) / 10;
-      state.currentPredio.fondo = Math.round((areaM2 / state.currentPredio.frente) * 10) / 10;
-      
-      syncAllViews(state.currentPredio);
-      showToast(`✓ Predio delimitado: ${areaM2.toFixed(1)} m² de área y ${perimetro.toFixed(1)} m de perímetro.`);
-    }
-  });
+
+      // Calcular área del polígono dibujado (Fórmula geodésica de polígono)
+      if (layer instanceof L.Polygon) {
+        const latlngs = layer.getLatLngs()[0];
+        const areaM2 = (typeof L.GeometryUtil !== 'undefined' && L.GeometryUtil.geodesicArea) 
+          ? L.GeometryUtil.geodesicArea(latlngs) 
+          : calculatePolygonAreaApprox(latlngs);
+        
+        // Obtener centroide del polígono
+        const bounds = layer.getBounds();
+        const center = bounds.getCenter();
+        
+        // Crear predio a partir del área dibujada
+        createCustomPredioFromCoords(center.lat, center.lng);
+        state.currentPredio.areaTerreno = Math.round(areaM2 * 100) / 100;
+        state.currentPredio.direccion = `Predio Delimitado Manualmente (${areaM2.toFixed(1)} m²)`;
+        
+        // Calcular perímetro aproximado
+        let perimetro = 0;
+        for (let i = 0; i < latlngs.length; i++) {
+          const next = (i + 1) % latlngs.length;
+          perimetro += latlngs[i].distanceTo(latlngs[next]);
+        }
+        state.currentPredio.frente = Math.round(Math.sqrt(areaM2 * 0.4) * 10) / 10;
+        state.currentPredio.fondo = Math.round((areaM2 / state.currentPredio.frente) * 10) / 10;
+        
+        syncAllViews(state.currentPredio);
+        showToast(`✓ Predio delimitado: ${areaM2.toFixed(1)} m² de área y ${perimetro.toFixed(1)} m de perímetro.`);
+      }
+    });
+  }
 
   // Botón "Delimitar Predio"
   const btnDrawLot = document.getElementById('btn-draw-lot');
   if (btnDrawLot) {
     btnDrawLot.addEventListener('click', () => {
-      // Activar modo mapa Leaflet para poder dibujar
       setMapMode('osm');
+      if (typeof L.Draw === 'undefined' || !L.Draw.Polygon) {
+        showToast('⚠️ Módulo de dibujo no disponible en este momento. Haz clic directo en el mapa para ubicar.');
+        return;
+      }
       showToast('✏️ Haz clic en el mapa para marcar los vértices de tu lote. Doble clic para cerrar el polígono.');
       
-      // Iniciar herramienta de polígono de Leaflet.draw
       const polygonDrawer = new L.Draw.Polygon(state.leafletMap, {
         shapeOptions: {
           color: '#059669',
