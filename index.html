@@ -15,6 +15,8 @@
   
   <!-- Leaflet CSS para Mapas Interactivos -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <!-- Leaflet.draw CSS para Delimitación Interactiva de Predios -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
 
   <!-- html2pdf.js para Exportación Directa de PDF en Móvil y PC -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -375,6 +377,11 @@
                 
                 <!-- Selector de Modo de Mapa -->
                 <div class="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-full shadow-sm">
+                  <button id="btn-draw-lot" class="px-3 py-1 rounded-full text-label-sm bg-emerald-600 text-white font-semibold shadow-sm hover:bg-emerald-700 transition-all flex items-center gap-1" title="Dibujar límites del lote directamente en el mapa">
+                    <span class="material-symbols-outlined text-[15px]">polyline</span>
+                    <span>Delimitar Predio</span>
+                  </button>
+                  <div class="h-4 w-px bg-surface-variant"></div>
                   <button id="btn-mode-igac" class="px-3 py-1 rounded-full text-label-sm bg-purple-700 text-white font-semibold shadow-sm transition-all flex items-center gap-1">
                     <span class="material-symbols-outlined text-[15px]">map</span>
                     <span>Mapa IGAC Oficial</span>
@@ -995,11 +1002,17 @@
               <p class="font-body-sm text-[12px] text-tertiary">Cartografía oficial aprobada en el Acuerdo Municipal 029 del 28 de diciembre de 2016.</p>
             </div>
           </div>
-          <a href="https://drive.google.com/drive/folders/0B0erYQEtPPx4ZUlSSEpxTjEtVnc" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm hover:bg-primary-container transition-all flex items-center gap-1.5 shadow-sm">
-            <span class="material-symbols-outlined text-[16px]">folder_open</span>
-            <span>Abrir Carpeta Google Drive Oficial</span>
-            <span class="material-symbols-outlined text-[14px]">north_east</span>
-          </a>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button id="btn-download-selected-plans" class="px-4 py-2.5 rounded-full bg-emerald-700 text-white font-label-sm text-label-sm hover:bg-emerald-800 transition-all flex items-center gap-1.5 shadow-sm">
+              <span class="material-symbols-outlined text-[16px]">download</span>
+              <span id="btn-selected-plans-count">Descargar Planos Seleccionados (0)</span>
+            </button>
+            <a href="https://drive.google.com/drive/folders/0B0erYQEtPPx4ZUlSSEpxTjEtVnc" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm hover:bg-primary-container transition-all flex items-center gap-1.5 shadow-sm">
+              <span class="material-symbols-outlined text-[16px]">folder_open</span>
+              <span>Carpeta Drive Oficial</span>
+              <span class="material-symbols-outlined text-[14px]">north_east</span>
+            </a>
+          </div>
         </div>
 
         <!-- Categorías de Planos generadas dinámicamente -->
@@ -1055,6 +1068,21 @@
         <p class="text-xs mb-3"><strong>Parámetros Evaluados:</strong> <span id="dossier-print-propuesta"></span></p>
         <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs">
           <strong>Dictamen Técnico:</strong> Los parámetros volumétricos preliminares han sido evaluados contra los índices máximos de ocupación (Art. 184), construcción (Art. 186), alturas (Art. 192) y aislamientos (Art. 198) del Acuerdo 029 de 2016 de Sogamoso.
+        </div>
+      </div>
+
+      <!-- Observaciones y Notas Técnicas del Usuario -->
+      <div class="mb-6 p-4 rounded-xl bg-gray-50 border border-gray-200">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-primary mb-2">03 · Observaciones del Evaluador / Notas del Proyecto</h2>
+        <p id="dossier-print-user-notes" class="text-xs text-gray-700 italic">Sin observaciones adicionales.</p>
+      </div>
+
+      <!-- Listado de Planos POT de Referencia Seleccionados -->
+      <div class="mb-6 p-4 rounded-xl bg-gray-50 border border-gray-200">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-primary mb-2">04 · Cartografía Oficial POT de Referencia Consultada</h2>
+        <div id="dossier-print-plans-list" class="text-xs text-gray-700 space-y-1">
+          <p>• Plano U-01: Usos del Suelo Urbano (Acuerdo 029/2016)</p>
+          <p>• Plano U-02: Tratamientos Urbanísticos (UTD)</p>
         </div>
       </div>
 
@@ -1171,6 +1199,8 @@
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Leaflet.draw JS para Dibujar y Delimitar Predios -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 
   <!-- Script Principal de la Aplicación -->
   <script type="module" src="js/app.js"></script>

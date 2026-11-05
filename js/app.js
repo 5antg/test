@@ -44,7 +44,11 @@ const state = {
     tratamientos: null,
     vias: null,
     ambiental: null
-  }
+  },
+  drawnItems: null,
+  drawControl: null,
+  selectedPlanos: new Set(['U-01', 'U-02']),
+  userNotes: ''
 };
 
 // Inicialización cuando carga el DOM
@@ -240,6 +244,65 @@ function initLeafletMap() {
           state.leafletMap.removeLayer(state.igacCatastroLayer);
         }
       }
+    });
+  }
+
+  // Inicializar FeatureGroup para polígonos dibujados por el usuario
+  state.drawnItems = new L.FeatureGroup();
+  state.leafletMap.addLayer(state.drawnItems);
+
+  // Escuchar eventos de dibujo de Leaflet.draw
+  state.leafletMap.on(L.Draw.Event.CREATED, (event) => {
+    const layer = event.layer;
+    state.drawnItems.clearLayers();
+    state.drawnItems.addLayer(layer);
+
+    // Calcular área del polígono dibujado (Fórmula geodésica de polígono)
+    if (layer instanceof L.Polygon) {
+      const latlngs = layer.getLatLngs()[0];
+      const areaM2 = L.GeometryUtil ? L.GeometryUtil.geodesicArea(latlngs) : calculatePolygonAreaApprox(latlngs);
+      
+      // Obtener centroide del polígono
+      const bounds = layer.getBounds();
+      const center = bounds.getCenter();
+      
+      // Crear predio a partir del área dibujada
+      createCustomPredioFromCoords(center.lat, center.lng);
+      state.currentPredio.areaTerreno = Math.round(areaM2 * 100) / 100;
+      state.currentPredio.direccion = `Predio Delimitado Manualmente (${areaM2.toFixed(1)} m²)`;
+      
+      // Calcular perímetro aproximado
+      let perimetro = 0;
+      for (let i = 0; i < latlngs.length; i++) {
+        const next = (i + 1) % latlngs.length;
+        perimetro += latlngs[i].distanceTo(latlngs[next]);
+      }
+      state.currentPredio.frente = Math.round(Math.sqrt(areaM2 * 0.4) * 10) / 10;
+      state.currentPredio.fondo = Math.round((areaM2 / state.currentPredio.frente) * 10) / 10;
+      
+      syncAllViews(state.currentPredio);
+      showToast(`✓ Predio delimitado: ${areaM2.toFixed(1)} m² de área y ${perimetro.toFixed(1)} m de perímetro.`);
+    }
+  });
+
+  // Botón "Delimitar Predio"
+  const btnDrawLot = document.getElementById('btn-draw-lot');
+  if (btnDrawLot) {
+    btnDrawLot.addEventListener('click', () => {
+      // Activar modo mapa Leaflet para poder dibujar
+      setMapMode('osm');
+      showToast('✏️ Haz clic en el mapa para marcar los vértices de tu lote. Doble clic para cerrar el polígono.');
+      
+      // Iniciar herramienta de polígono de Leaflet.draw
+      const polygonDrawer = new L.Draw.Polygon(state.leafletMap, {
+        shapeOptions: {
+          color: '#059669',
+          fillColor: '#10b981',
+          fillOpacity: 0.35,
+          weight: 3
+        }
+      });
+      polygonDrawer.enable();
     });
   }
 
@@ -444,6 +507,24 @@ const CALLE_LAT_STEP = 0.000845;
 // - Las carreras aumentan hacia el OCCIDENTE / OESTE (Cra. 11 es más al este que Cra. 14, 18, 20) -> Longitud se hace más negativa (-72.9333 -> -72.9400)
 //   Distancia longitudinal por carrera ≈ 0.00088 grados (~97 metros)
 const CARRERA_LNG_STEP = 0.00088;
+
+// Función de cálculo geométrico aproximado de área de polígonos si no está disponible GeometryUtil
+function calculatePolygonAreaApprox(coords) {
+  let area = 0;
+  if (coords.length > 2) {
+    for (let i = 0; i < coords.length; i++) {
+      const p1 = coords[i];
+      const p2 = coords[(i + 1) % coords.length];
+      const x1 = p1.lng * 111139 * Math.cos(p1.lat * Math.PI / 180);
+      const y1 = p1.lat * 111139;
+      const x2 = p2.lng * 111139 * Math.cos(p2.lat * Math.PI / 180);
+      const y2 = p2.lat * 111139;
+      area += (x1 * y2 - x2 * y1);
+    }
+    area = Math.abs(area) / 2;
+  }
+  return area;
+}
 
 function isWithinSogamoso(lat, lng) {
   // Perímetro urbano aproximado del municipio de Sogamoso, Boyacá
@@ -1123,11 +1204,19 @@ function updateCesionesView(predio) {
 }
 
 /* ==========================================================================
-   7. PLANOTECA OFICIAL POT 2016 (VISOR DE PLANOS PDF DEL DRIVE)
+   7. PLANOTECA OFICIAL POT 2016 (VISOR DE PLANOS PDF DEL DRIVE Y SELECTOR)
    ========================================================================== */
 function initPlanoteca() {
   const container = document.getElementById('planoteca-categories-container');
+  const countBadge = document.getElementById('btn-selected-plans-count');
+  const btnDownloadCompendium = document.getElementById('btn-download-selected-plans');
   if (!container) return;
+
+  function updateSelectedCount() {
+    if (countBadge) {
+      countBadge.textContent = `Descargar Planos Seleccionados (${state.selectedPlanos.size})`;
+    }
+  }
 
   container.innerHTML = '';
 
@@ -1135,9 +1224,12 @@ function initPlanoteca() {
     const card = document.createElement('div');
     card.className = "bg-surface-container-lowest rounded-2xl p-space-md shadow-sm flex flex-col gap-space-sm border border-surface-variant/40";
     
-    let planosHtml = cat.planos.map(plano => `
+    let planosHtml = cat.planos.map(plano => {
+      const isChecked = state.selectedPlanos.has(plano.codigo) ? 'checked' : '';
+      return `
       <div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all">
         <div class="flex items-center gap-3">
+          <input type="checkbox" data-plano-code="${plano.codigo}" ${isChecked} class="plano-checkbox w-4 h-4 accent-purple-700 cursor-pointer rounded"/>
           <span class="w-8 h-8 rounded-full bg-primary/10 text-primary font-mono font-semibold text-label-sm flex items-center justify-center">${plano.codigo}</span>
           <div class="flex flex-col">
             <h5 class="font-headline-sm text-[15px] font-semibold text-on-surface">${plano.titulo}</h5>
@@ -1147,16 +1239,66 @@ function initPlanoteca() {
         <div class="flex items-center gap-2">
           <a href="${plano.urlDescarga}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm hover:bg-primary-container transition-all shadow-sm">
             <span class="material-symbols-outlined text-[16px]">visibility</span>
-            <span>Ver en Drive</span>
+            <span>Ver PDF</span>
           </a>
         </div>
       </div>
-    `).join('');
+    `}).join('');
 
     card.innerHTML = `
       <div class="flex items-center justify-between pb-2 border-b border-surface-variant/30">
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-primary text-[22px]">map</span>
+          <h4 class="font-headline-sm text-headline-sm font-semibold text-on-surface">${cat.categoria}</h4>
+        </div>
+        <span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-medium">${cat.planos.length} Planos</span>
+      </div>
+      <p class="font-body-sm text-body-sm text-tertiary">${cat.descripcion}</p>
+      <div class="flex flex-col gap-2 pt-2">
+        ${planosHtml}
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+
+  // Escuchar cambios en los checkboxes de planos
+  container.addEventListener('change', (e) => {
+    if (e.target && e.target.classList.contains('plano-checkbox')) {
+      const code = e.target.getAttribute('data-plano-code');
+      if (e.target.checked) {
+        state.selectedPlanos.add(code);
+      } else {
+        state.selectedPlanos.delete(code);
+      }
+      updateSelectedCount();
+    }
+  });
+
+  // Botón para compendio de planos seleccionados
+  if (btnDownloadCompendium) {
+    btnDownloadCompendium.addEventListener('click', () => {
+      if (state.selectedPlanos.size === 0) {
+        showToast('⚠️ Selecciona al menos un plano con la casilla de verificación.');
+        return;
+      }
+      
+      // Abrir enlaces de los planos seleccionados
+      let abiertos = 0;
+      CATALOGO_PLANOS_POT.forEach(cat => {
+        cat.planos.forEach(p => {
+          if (state.selectedPlanos.has(p.codigo)) {
+            window.open(p.urlDescarga, '_blank');
+            abiertos++;
+          }
+        });
+      });
+      showToast(`✓ Abriendo ${abiertos} plano(s) oficial(es) del POT seleccionados.`);
+    });
+  }
+
+  updateSelectedCount();
+}
           <h4 class="font-headline-sm text-headline-sm font-semibold text-on-surface">${cat.categoria}</h4>
         </div>
         <span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-medium">${cat.planos.length} Planos</span>
@@ -1474,6 +1616,30 @@ function generateAndPrintDossier() {
       mapImg.classList.add('hidden');
       if (mapFallback) mapFallback.classList.remove('hidden');
     };
+  }
+
+  // Llenar observaciones del usuario
+  const elUserNotes = document.getElementById('dossier-print-user-notes');
+  if (elUserNotes) {
+    elUserNotes.textContent = state.userNotes || "Evaluación urbanística preliminar de viabilidad según Acuerdo Municipal 029 del 28 de diciembre de 2016 (POT Sogamoso).";
+  }
+
+  // Llenar planos de referencia seleccionados
+  const elPlansList = document.getElementById('dossier-print-plans-list');
+  if (elPlansList) {
+    const planosNombres = [];
+    CATALOGO_PLANOS_POT.forEach(cat => {
+      cat.planos.forEach(p => {
+        if (state.selectedPlanos.has(p.codigo)) {
+          planosNombres.push(`• Plano ${p.codigo}: ${p.titulo} (${p.escala})`);
+        }
+      });
+    });
+    if (planosNombres.length > 0) {
+      elPlansList.innerHTML = planosNombres.map(n => `<p>${n}</p>`).join('');
+    } else {
+      elPlansList.innerHTML = `<p>• Consulta cartográfica general del POT Sogamoso 2016.</p>`;
+    }
   }
 
   // Descargar directo con html2pdf si está disponible en móvil, o ventana de impresión
