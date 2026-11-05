@@ -16,7 +16,7 @@ import {
 // Estado Global Reactivo de la Aplicación
 const state = {
   activeTab: 'explorador',
-  mapMode: 'igac', // 'igac' | 'leaflet' | 'svg'
+  mapMode: 'osm', // 'osm' | 'igac' | 'cad' (Leaflet interactivo por defecto)
   currentPredio: PREDIOS_PRESET[0], // Por defecto predio Cl. 26 & Cra. 12 (13.993,92 m²)
   allPredios: [...PREDIOS_PRESET],
   proposals: {

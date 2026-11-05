@@ -371,7 +371,7 @@
               <!-- Map Controls Header -->
               <div class="flex flex-wrap items-center justify-between gap-3 mb-4 z-10 relative">
                 <div class="flex items-center gap-2">
-                  <span id="map-mode-label" class="font-headline-sm text-headline-sm font-semibold text-on-surface tracking-tight">Geovisor Oficial IGAC (Colombia en Mapas)</span>
+                  <span id="map-mode-label" class="font-headline-sm text-headline-sm font-semibold text-on-surface tracking-tight">Mapa Satelital / Urbano (Leaflet)</span>
                   <span class="px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">Sogamoso Real</span>
                 </div>
                 
@@ -382,13 +382,13 @@
                     <span>Delimitar Predio</span>
                   </button>
                   <div class="h-4 w-px bg-surface-variant"></div>
-                  <button id="btn-mode-igac" class="px-3 py-1 rounded-full text-label-sm bg-purple-700 text-white font-semibold shadow-sm transition-all flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[15px]">map</span>
-                    <span>Mapa IGAC Oficial</span>
-                  </button>
-                  <button id="btn-mode-osm" class="px-3 py-1 rounded-full text-label-sm text-tertiary hover:text-primary font-medium transition-all flex items-center gap-1">
+                  <button id="btn-mode-osm" class="px-3 py-1 rounded-full text-label-sm bg-primary text-white font-semibold shadow-sm transition-all flex items-center gap-1">
                     <span class="material-symbols-outlined text-[15px]">layers</span>
                     <span>Mapa Calles / Satelital</span>
+                  </button>
+                  <button id="btn-mode-igac" class="px-3 py-1 rounded-full text-label-sm text-tertiary hover:text-primary font-medium transition-all flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[15px]">map</span>
+                    <span>Mapa IGAC Oficial</span>
                   </button>
                   <button id="btn-mode-cad" class="px-3 py-1 rounded-full text-label-sm text-tertiary hover:text-primary font-medium transition-all flex items-center gap-1">
                     <span class="material-symbols-outlined text-[15px]">architecture</span>
@@ -407,14 +407,14 @@
               <!-- Map Viewport -->
               <div class="w-full h-[420px] sm:h-[500px] lg:h-[620px] rounded-2xl relative overflow-hidden flex items-center justify-center border border-purple-200">
                 
-                <!-- 1. Visor Embebido Colombia en Mapas (IGAC Oficial) - ACTIVO POR DEFECTO -->
-                <div id="igac-iframe-wrapper" class="w-full h-full relative bg-white">
-                  <iframe id="igac-live-frame" src="https://www.colombiaenmapas.gov.co/?e=-72.9350,5.7220,-72.9200,5.7320,4326&b=igac&u=0&t=catastro" class="w-full h-full border-0" allow="geolocation" title="Catastro Oficial IGAC Sogamoso"></iframe>
+                <!-- 1. Leaflet Interactive Map Container (ACTIVO POR DEFECTO PARA CLIC Y DELIMITAR) -->
+                <div id="leaflet-map-wrapper" class="w-full h-full relative">
+                  <div id="leaflet-map" class="w-full h-full z-0"></div>
                 </div>
 
-                <!-- 2. Leaflet Interactive Map Container (Alternable) -->
-                <div id="leaflet-map-wrapper" class="w-full h-full relative hidden">
-                  <div id="leaflet-map" class="w-full h-full z-0"></div>
+                <!-- 2. Visor Embebido Colombia en Mapas (IGAC Oficial) - ALTERNABLE -->
+                <div id="igac-iframe-wrapper" class="w-full h-full relative bg-white hidden">
+                  <iframe id="igac-live-frame" src="about:blank" class="w-full h-full border-0" allow="geolocation" title="Catastro Oficial IGAC Sogamoso"></iframe>
                 </div>
 
                 <!-- 3. CAD SVG Map Container (Alternable) -->
