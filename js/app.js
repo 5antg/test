@@ -16,7 +16,7 @@ import {
 // Estado Global Reactivo de la Aplicación
 const state = {
   activeTab: 'explorador',
-  mapMode: 'leaflet', // 'leaflet' | 'svg'
+  mapMode: 'igac', // 'igac' | 'leaflet' | 'svg'
   currentPredio: PREDIOS_PRESET[0], // Por defecto predio Cl. 26 & Cra. 12 (13.993,92 m²)
   allPredios: [...PREDIOS_PRESET],
   proposals: {
@@ -260,46 +260,61 @@ function initLeafletMap() {
     state.leafletMap.setView([state.currentPredio.coordenadas.lat, state.currentPredio.coordenadas.lng], 18);
   });
 
-  // Alternador de vistas del mapa: Leaflet -> Colombia en Mapas (IGAC) -> Plano CAD
-  const toggleMapBtn = document.getElementById('btn-toggle-map-mode');
-  if (toggleMapBtn) {
-    toggleMapBtn.addEventListener('click', () => {
-      const leafletContainer = document.getElementById('leaflet-map-wrapper');
-      const svgContainer = document.getElementById('svg-map-wrapper');
-      const igacContainer = document.getElementById('igac-iframe-wrapper');
-      const igacFrame = document.getElementById('igac-live-frame');
-      const modeLabel = document.getElementById('map-mode-label');
+  // Controladores de botones de modo de mapa
+  const btnModeIgac = document.getElementById('btn-mode-igac');
+  const btnModeOsm = document.getElementById('btn-mode-osm');
+  const btnModeCad = document.getElementById('btn-mode-cad');
 
-      if (state.mapMode === 'leaflet') {
-        state.mapMode = 'igac';
-        leafletContainer.classList.add('hidden');
-        svgContainer.classList.add('hidden');
-        if (igacContainer) igacContainer.classList.remove('hidden');
-        
-        // Cargar vista centrada en el lote actual en Colombia en Mapas
-        const lat = state.currentPredio.coordenadas.lat;
-        const lng = state.currentPredio.coordenadas.lng;
-        const igacUrl = `https://www.colombiaenmapas.gov.co/?e=${(lng - 0.005).toFixed(4)},${(lat - 0.005).toFixed(4)},${(lng + 0.005).toFixed(4)},${(lat + 0.005).toFixed(4)},4326&b=igac&u=0&t=catastro`;
-        if (igacFrame && (!igacFrame.src || igacFrame.src === 'about:blank' || !igacFrame.src.includes('colombiaenmapas'))) {
-          igacFrame.src = igacUrl;
-        }
-        if (modeLabel) modeLabel.textContent = "Geovisor Oficial IGAC (Colombia en Mapas)";
-      } else if (state.mapMode === 'igac') {
-        state.mapMode = 'svg';
-        if (igacContainer) igacContainer.classList.add('hidden');
-        leafletContainer.classList.add('hidden');
-        svgContainer.classList.remove('hidden');
-        if (modeLabel) modeLabel.textContent = "Vista Planimétrica CAD (SVG)";
-      } else {
-        state.mapMode = 'leaflet';
-        if (igacContainer) igacContainer.classList.add('hidden');
-        svgContainer.classList.add('hidden');
-        leafletContainer.classList.remove('hidden');
-        if (modeLabel) modeLabel.textContent = "Mapa Satelital / Urbano (Leaflet)";
-        if (state.leafletMap) state.leafletMap.invalidateSize();
+  const leafletContainer = document.getElementById('leaflet-map-wrapper');
+  const svgContainer = document.getElementById('svg-map-wrapper');
+  const igacContainer = document.getElementById('igac-iframe-wrapper');
+  const igacFrame = document.getElementById('igac-live-frame');
+  const modeLabel = document.getElementById('map-mode-label');
+
+  function setMapMode(mode) {
+    state.mapMode = mode;
+    
+    // Reset buttons style
+    [btnModeIgac, btnModeOsm, btnModeCad].forEach(b => {
+      if (b) {
+        b.className = "px-3 py-1 rounded-full text-label-sm text-tertiary hover:text-primary font-medium transition-all flex items-center gap-1";
       }
     });
+
+    if (mode === 'igac') {
+      if (btnModeIgac) btnModeIgac.className = "px-3 py-1 rounded-full text-label-sm bg-purple-700 text-white font-semibold shadow-sm transition-all flex items-center gap-1";
+      if (igacContainer) igacContainer.classList.remove('hidden');
+      if (leafletContainer) leafletContainer.classList.add('hidden');
+      if (svgContainer) svgContainer.classList.add('hidden');
+      if (modeLabel) modeLabel.textContent = "Geovisor Oficial IGAC (Colombia en Mapas)";
+
+      // Actualizar vista IGAC con las coordenadas del predio actual
+      const lat = state.currentPredio.coordenadas.lat;
+      const lng = state.currentPredio.coordenadas.lng;
+      const igacUrl = `https://www.colombiaenmapas.gov.co/?e=${(lng - 0.005).toFixed(4)},${(lat - 0.005).toFixed(4)},${(lng + 0.005).toFixed(4)},${(lat + 0.005).toFixed(4)},4326&b=igac&u=0&t=catastro`;
+      if (igacFrame) igacFrame.src = igacUrl;
+    } else if (mode === 'osm') {
+      if (btnModeOsm) btnModeOsm.className = "px-3 py-1 rounded-full text-label-sm bg-primary text-white font-semibold shadow-sm transition-all flex items-center gap-1";
+      if (igacContainer) igacContainer.classList.add('hidden');
+      if (leafletContainer) leafletContainer.classList.remove('hidden');
+      if (svgContainer) svgContainer.classList.add('hidden');
+      if (modeLabel) modeLabel.textContent = "Mapa Calles / Satelital (Leaflet)";
+      if (state.leafletMap) {
+        state.leafletMap.invalidateSize();
+        state.leafletMap.setView([state.currentPredio.coordenadas.lat, state.currentPredio.coordenadas.lng], 17);
+      }
+    } else if (mode === 'cad') {
+      if (btnModeCad) btnModeCad.className = "px-3 py-1 rounded-full text-label-sm bg-purple-900 text-white font-semibold shadow-sm transition-all flex items-center gap-1";
+      if (igacContainer) igacContainer.classList.add('hidden');
+      if (leafletContainer) leafletContainer.classList.add('hidden');
+      if (svgContainer) svgContainer.classList.remove('hidden');
+      if (modeLabel) modeLabel.textContent = "Vista Planimétrica CAD (SVG)";
+    }
   }
+
+  if (btnModeIgac) btnModeIgac.addEventListener('click', () => setMapMode('igac'));
+  if (btnModeOsm) btnModeOsm.addEventListener('click', () => setMapMode('osm'));
+  if (btnModeCad) btnModeCad.addEventListener('click', () => setMapMode('cad'));
 }
 
 /**
@@ -401,7 +416,7 @@ export function decodeCadastralCode(code) {
 function updateColombiaEnMapasLink(predio) {
   const btnIgac = document.getElementById('btn-colombia-en-mapas-link');
   const btnIgacDirect = document.getElementById('btn-open-igac-direct');
-  if (!btnIgac && !btnIgacDirect) return;
+  const igacFrame = document.getElementById('igac-live-frame');
 
   const lat = predio.coordenadas.lat;
   const lng = predio.coordenadas.lng;
@@ -409,6 +424,9 @@ function updateColombiaEnMapasLink(predio) {
   const url = `https://www.colombiaenmapas.gov.co/?e=${(lng - 0.005).toFixed(4)},${(lat - 0.005).toFixed(4)},${(lng + 0.005).toFixed(4)},${(lat + 0.005).toFixed(4)},4326&b=igac&u=0&t=catastro`;
   if (btnIgac) btnIgac.href = url;
   if (btnIgacDirect) btnIgacDirect.href = url;
+  if (igacFrame && state.mapMode === 'igac') {
+    igacFrame.src = url;
+  }
 }
 
 // --- Constantes de grilla urbana de Sogamoso ---

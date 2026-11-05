@@ -369,28 +369,28 @@
               <!-- Map Controls Header -->
               <div class="flex flex-wrap items-center justify-between gap-3 mb-4 z-10 relative">
                 <div class="flex items-center gap-2">
-                  <span id="map-mode-label" class="font-headline-sm text-headline-sm font-semibold text-on-surface tracking-tight">Mapa Satelital / Urbano (Leaflet)</span>
+                  <span id="map-mode-label" class="font-headline-sm text-headline-sm font-semibold text-on-surface tracking-tight">Geovisor Oficial IGAC (Colombia en Mapas)</span>
                   <span class="px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">Sogamoso Real</span>
                 </div>
                 
-                <!-- Toggle Map Mode & Zooms -->
+                <!-- Selector de Modo de Mapa -->
                 <div class="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-full shadow-sm">
-                  <a id="btn-open-igac-direct" href="https://www.colombiaenmapas.gov.co/?e=-72.9462,5.7203,-72.9362,5.7303,4326&b=igac&u=0&t=catastro" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded-full text-label-sm bg-purple-700 text-white font-medium hover:bg-purple-800 transition-all flex items-center gap-1 shadow-sm" title="Abrir Geovisor IGAC Oficial en vivo">
-                    <span class="material-symbols-outlined text-[15px]">open_in_new</span>
-                    <span>Visor IGAC Oficial</span>
+                  <button id="btn-mode-igac" class="px-3 py-1 rounded-full text-label-sm bg-purple-700 text-white font-semibold shadow-sm transition-all flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[15px]">map</span>
+                    <span>Mapa IGAC Oficial</span>
+                  </button>
+                  <button id="btn-mode-osm" class="px-3 py-1 rounded-full text-label-sm text-tertiary hover:text-primary font-medium transition-all flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[15px]">layers</span>
+                    <span>Mapa Calles / Satelital</span>
+                  </button>
+                  <button id="btn-mode-cad" class="px-3 py-1 rounded-full text-label-sm text-tertiary hover:text-primary font-medium transition-all flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[15px]">architecture</span>
+                    <span>Plano CAD</span>
+                  </button>
+                  <div class="h-4 w-px bg-surface-variant"></div>
+                  <a id="btn-open-igac-direct" href="https://www.colombiaenmapas.gov.co/?e=-72.9462,5.7203,-72.9362,5.7303,4326&b=igac&u=0&t=catastro" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-primary transition-all" title="Abrir en ventana completa">
+                    <span class="material-symbols-outlined text-[16px]">open_in_new</span>
                   </a>
-                  <div class="h-4 w-px bg-surface-variant"></div>
-                  <button id="btn-toggle-map-mode" class="px-3 py-1 rounded-full text-label-sm bg-surface-container-highest text-primary font-medium hover:bg-primary hover:text-white transition-all flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[15px]">sync_alt</span>
-                    <span>Alternar Plano CAD</span>
-                  </button>
-                  <div class="h-4 w-px bg-surface-variant"></div>
-                  <button id="btn-map-zoom-in" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-on-surface transition-all" title="Acercar">
-                    <span class="material-symbols-outlined text-[18px]">add</span>
-                  </button>
-                  <button id="btn-map-zoom-out" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-on-surface transition-all" title="Alejar">
-                    <span class="material-symbols-outlined text-[18px]">remove</span>
-                  </button>
                   <button id="btn-map-recenter" class="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-on-primary shadow-sm hover:bg-primary-container transition-all" title="Centrar Predio">
                     <span class="material-symbols-outlined text-[16px]">my_location</span>
                   </button>
@@ -398,14 +398,19 @@
               </div>
 
               <!-- Map Viewport -->
-              <div class="w-full h-[380px] sm:h-[480px] lg:h-[580px] rounded-2xl relative overflow-hidden flex items-center justify-center">
+              <div class="w-full h-[420px] sm:h-[500px] lg:h-[620px] rounded-2xl relative overflow-hidden flex items-center justify-center border border-purple-200">
                 
-                <!-- 1. Leaflet Interactive Map Container -->
-                <div id="leaflet-map-wrapper" class="w-full h-full relative">
+                <!-- 1. Visor Embebido Colombia en Mapas (IGAC Oficial) - ACTIVO POR DEFECTO -->
+                <div id="igac-iframe-wrapper" class="w-full h-full relative bg-white">
+                  <iframe id="igac-live-frame" src="https://www.colombiaenmapas.gov.co/?e=-72.9350,5.7220,-72.9200,5.7320,4326&b=igac&u=0&t=catastro" class="w-full h-full border-0" allow="geolocation" title="Catastro Oficial IGAC Sogamoso"></iframe>
+                </div>
+
+                <!-- 2. Leaflet Interactive Map Container (Alternable) -->
+                <div id="leaflet-map-wrapper" class="w-full h-full relative hidden">
                   <div id="leaflet-map" class="w-full h-full z-0"></div>
                 </div>
 
-                <!-- 2. CAD SVG Map Container (Alternable) -->
+                <!-- 3. CAD SVG Map Container (Alternable) -->
                 <div id="svg-map-wrapper" class="w-full h-full hidden bg-surface-container-low">
                   <svg class="w-full h-full object-cover select-none" fill="none" viewBox="0 0 880 580" xmlns="http://www.w3.org/2000/svg">
                     <rect fill="#faf0ff" height="580" width="880"></rect>
